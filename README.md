@@ -1,1 +1,1 @@
-The C server for socket.io
+The socket.io Linux C server

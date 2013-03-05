@@ -1,0 +1,45 @@
+Tasks need to do list:
+     
+       Static File:
+           ✔ serve big satic file @done (13-03-05 09:21)
+           ✔ http://192.168.190.150:8000/chat.html? @done (13-03-05 09:21)
+
+        Timeout:
+           ✔ polling timeout @done (13-03-05 09:21)
+           ✔ websocket heartbeat @done (13-02-23 20:18)
+
+         Idle Watch:
+           ☐ delete session with state = disconnected-state(-2)
+           ☐ delete invalid session only have handshake
+         Websocket:
+           ✔ don't write to client with some messages @done (13-02-23 20:17)
+               顶顶顶顶的顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶的顶顶顶顶顶顶顶顶顶顶的顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶
+                   // 70 OK
+                  // 80 OK
+                  // 90 bad
+                  // 120 bad
+                  // 130 bad
+                  // 140 bad
+                  // 170 bad
+                  // 172 OK
+         FlashSocket:
+             ✘ security policy request @cancelled (13-03-05 09:21)
+             ✘ FlashSocket Transport @cancelled (13-03-05 09:21)
+         Free Resource:
+             ✘ struct transport_info @cancelled (13-03-05 09:21)
+             ✘ struct session_t with endpoint value @cancelled (13-03-05 09:21)
+          chat_demo:
+             ✔ on_disconnected event @done (13-02-25 20:37)
+
+
+
+LEARN :
+      ✔ errno ? @done (13-03-05 09:21)
+
+
+
+SOME BUGS:
+      ✔ webserver: http_parser.c:1797: http_parser_execute: Assertion `0 && "unhandled state"' failed. @done (13-03-05 09:22)
+Aborted (core dumped)
+      ✔ switch transports will be caused transport exchange @done (13-03-05 09:22)
+      

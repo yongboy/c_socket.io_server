@@ -1,0 +1,1199 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"glo",
+				"global_config	config *"
+			],
+			[
+				"session",
+				"sessionid"
+			],
+			[
+				"ses",
+				"sessionid	char *"
+			],
+			[
+				"c",
+				"close_timeout	ev_timer"
+			],
+			[
+				"ev_timer",
+				"ev_timer_stop(struct ev_loop *loop, ev_timer *w)	void"
+			],
+			[
+				"ev_de",
+				"ev_default_loop()	struct ev_loop *"
+			],
+			[
+				"h",
+				"heartbeat_handle	void (*)(client_t *, char *)"
+			],
+			[
+				"tran",
+				"trans_fn	transports_fn *"
+			],
+			[
+				"se",
+				"session	session_t *"
+			],
+			[
+				"transport",
+				"transports"
+			],
+			[
+				"ra",
+				"raw_md5	char[]"
+			],
+			[
+				"k",
+				"key3	char [8]"
+			],
+			[
+				"I",
+				"IsBig_Endian()	int"
+			],
+			[
+				"o",
+				"out_frame	uint8_t[]"
+			],
+			[
+				"ori",
+				"ori_msg	const char *"
+			],
+			[
+				"tar",
+				"target_msg	char[]"
+			],
+			[
+				"body",
+				"on_body_cb"
+			],
+			[
+				"trans",
+				"trans_info	transport_info *"
+			],
+			[
+				"re",
+				"read_count	int"
+			],
+			[
+				"write",
+				"write_len"
+			],
+			[
+				"sess",
+				"session	session_t *"
+			],
+			[
+				"uuid",
+				"uuidBuff	char[]"
+			],
+			[
+				"ev_",
+				"ev_timer	typedef"
+			],
+			[
+				"flus",
+				"fflush(FILE *__stream)	int"
+			],
+			[
+				"file",
+				"filedata	char *"
+			],
+			[
+				"bo",
+				"bodyMsg	char[]"
+			],
+			[
+				"read",
+				"read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)	void"
+			],
+			[
+				"send",
+				"send(int __fd, const void *__buf, size_t __n, int __flags)	ssize_t"
+			],
+			[
+				"s",
+				"state	int"
+			],
+			[
+				"ms",
+				"msg_len	int"
+			],
+			[
+				"mem",
+				"memchr(const void *__s, int __c, size_t __n)	void *"
+			],
+			[
+				"memset",
+				"memset(void *__s, int __c, size_t __n)	void *"
+			],
+			[
+				"msg",
+				"msg	char *"
+			],
+			[
+				"strcpy",
+				"strcpy(char *restrict __dest, const char *restrict __src)	char *"
+			],
+			[
+				"write_",
+				"write_ws_msg(client_t *cli, char *msg)	void"
+			],
+			[
+				"endp",
+				"endpoint_impl	endpoint_implement *"
+			],
+			[
+				"http_parser_",
+				"http_parser_pause(http_parser *parser, int paused)	void"
+			],
+			[
+				"par",
+				"parsed"
+			],
+			[
+				"ev_timer_",
+				"ev_timer_remaining(struct ev_loop *loop, ev_timer *w)	ev_tstamp"
+			],
+			[
+				"ev_timer_st",
+				"ev_timer_stop(struct ev_loop *loop, ev_timer *w)	void"
+			],
+			[
+				"ev_tim",
+				"ev_timer	typedef"
+			],
+			[
+				"cli",
+				"cli"
+			],
+			[
+				"ti",
+				"timeout"
+			],
+			[
+				"free",
+				"freelibev"
+			],
+			[
+				"HT",
+				"HTMLFILE_RESPONSE_HEADER"
+			],
+			[
+				"resu",
+				"result_str	char[]"
+			],
+			[
+				"uv_ti",
+				"uv_timer_again"
+			],
+			[
+				"tmp",
+				"tmpbuf	char[]"
+			],
+			[
+				"tim",
+				"timeout	uv_timer_t *"
+			],
+			[
+				"end",
+				"endpoints_get"
+			],
+			[
+				"tr",
+				"trans_fn	transports_fn *"
+			],
+			[
+				"xhr",
+				"xhr_polling_output_whole(client_t *client, char *body_msg)	void"
+			],
+			[
+				"xhr_p",
+				"xhr_polling_output_body(client_t *client, char *http_msg)	void"
+			],
+			[
+				"ou",
+				"output_body	void (*)(client_t *, char *)"
+			],
+			[
+				"t",
+				"trans_info	transport_info"
+			],
+			[
+				"for",
+				"format_msg	char[]"
+			],
+			[
+				"int",
+				"intro"
+			],
+			[
+				"on",
+				"on_error_close"
+			],
+			[
+				"time_",
+				"time_handle	uv_timer_t *"
+			],
+			[
+				"stat",
+				"status	int"
+			],
+			[
+				"http_m",
+				"http_msg	char *"
+			],
+			[
+				"ex",
+				"except_sessionid	char *"
+			],
+			[
+				"timeou",
+				"timeout_cb"
+			],
+			[
+				"que",
+				"queue_num	guint"
+			],
+			[
+				"m",
+				"message"
+			],
+			[
+				"null",
+				"NULL"
+			],
+			[
+				"ev",
+				"event_name	char *"
+			],
+			[
+				"ni",
+				"nickname	char *"
+			],
+			[
+				"even",
+				"event_msg	event_message"
+			],
+			[
+				"e",
+				"event_name	char *"
+			],
+			[
+				"print",
+				"printf	printf …"
+			],
+			[
+				"chat_on_de",
+				"chat_on_disconnect(const char *sessionid, const message_fields *msg_fields)	void"
+			],
+			[
+				"en",
+				"endpoint_name	char *"
+			],
+			[
+				"get",
+				"getMyStruct5()	MyStruct *"
+			],
+			[
+				"cha",
+				"chat_impl_pointer	endpoint_implement *"
+			],
+			[
+				"chat",
+				"chat_impl_pointer	endpoint_implement *"
+			],
+			[
+				"http",
+				"http_msg	char *"
+			],
+			[
+				"r",
+				"results	char *"
+			],
+			[
+				"ma",
+				"match_info	GMatchInfo *"
+			],
+			[
+				"STR",
+				"strlen"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "parseurl.c",
+			"settings":
+			{
+				"buffer_size": 4596,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "Packages/User/C.sublime-build",
+	"command_palette":
+	{
+		"height": 56.0,
+		"selected_items":
+		[
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"mardown",
+				"Pandoc: Render Markdown to temp HTML and View"
+			],
+			[
+				"markdown",
+				"Set Syntax: Markdown"
+			],
+			[
+				"mds",
+				"Markdown Preview: preview in Sublime Text"
+			],
+			[
+				"add re",
+				"Package Control: Add Repository"
+			],
+			[
+				"add r",
+				"Package Control: Add Repository"
+			],
+			[
+				"repo",
+				"Package Control: Add Repository"
+			],
+			[
+				"ssm",
+				"Set Syntax: Markdown"
+			],
+			[
+				"md pre",
+				"Markdown Preview: preview in Browser"
+			],
+			[
+				"markdown pr",
+				"Markdown Preview: open Markdown Cheat sheet"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"inst",
+				"Tag: Remove Picked Tags in Selection"
+			],
+			[
+				"add",
+				"Project: Add Folder"
+			],
+			[
+				"save",
+				"Project: Save As"
+			],
+			[
+				"package",
+				"Package Control: Enable Package"
+			],
+			[
+				"Package Control: ",
+				"Package Control: Install Package"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"INSTA",
+				"Package Control: Install Package"
+			],
+			[
+				"INSTAL",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 489.0
+	},
+	"console":
+	{
+		"height": 139.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+			"-test/,-include/,*.c",
+			"-test/,-/include/*,*.c",
+			"-/test/,-/include/*,*.c",
+			"-/test/*.*,-/include/*,*.c",
+			"-test/ -include/ *.c",
+			"*.c",
+			"",
+			"-test/",
+			"",
+			"-test/",
+			"test/",
+			"test/-*.*",
+			"",
+			"include",
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"free(client)",
+			"free(",
+			"set session's client value with NULL",
+			"gen_uuid",
+			"heartbeat_handle",
+			"trans_fn->time_out",
+			"time_out",
+			"Got no transport struct",
+			")(",
+			"( *",
+			"handle_transport",
+			"flash",
+			"on_close",
+			"write_output",
+			"register_endpoint",
+			"transports",
+			"init_chat_endpoint_implement",
+			"#include \"webserver.h\"",
+			"real_body is",
+			"BUF_LEN",
+			"ws_make_frame",
+			"md5_init",
+			"register_endpoint",
+			"free_client",
+			"session_t",
+			"session",
+			"cli",
+			"md5",
+			"Origin",
+			"something dont parse ok with",
+			"nbyte",
+			"read error",
+			"handle here",
+			"printf(\"",
+			"handle_handshake",
+			"r) ",
+			"clear_handshake_cb",
+			"handle_disconnected",
+			"1361884117167",
+			"rbuff",
+			"unhandled state",
+			"0 && \"unhandled state\"' failed",
+			"session_nickname_lookup",
+			"start_flash_server",
+			"port",
+			"0.9",
+			"version",
+			"log",
+			"29",
+			"webroot",
+			"){\n",
+			"filelength",
+			"filepath",
+			"256",
+			"bodyMsg",
+			"test_flash",
+			"ev_accept",
+			"long_poll",
+			"listen_addr",
+			"trans_fn->heartbeat",
+			"->heartbeat",
+			"write_ws_msg",
+			"webdis_htonl64",
+			"dst",
+			");\n",
+			"sz",
+			"p",
+			"WEBSOCKET",
+			"hand_shake",
+			"session_t",
+			"50",
+			"message_fields",
+			"client->trans_info",
+			"client->trans_infoF",
+			"session_t",
+			";\n",
+			"write_ws_msg",
+			"1000",
+			"free_client",
+			"get_transport_fn",
+			"notice_connect",
+			"!!!!!!!!!!!!!!!!!!!!!! output msg",
+			"handle_static",
+			"99",
+			"session_nickname_size",
+			"parse error",
+			"HTMLFILE_RESPONSE_FIRST",
+			"write_body",
+			"write_output",
+			"uv_",
+			"HTMLFILE_RESPONSE_MIDDLE",
+			"HTMLFILE_RESPONSE_WELCOME",
+			"HTMLFILE_RESPONSE_FIRST",
+			"JSONP_RESPONSE_PLAIN",
+			"common_http_output",
+			"after_write",
+			"free_res",
+			"write_msg",
+			"cli",
+			"handle_transport",
+			"free_res",
+			"the client is NULL",
+			"insert_msg_into_queue",
+			"trans_fn",
+			"output_string",
+			"uv_",
+			"after_write_header",
+			"uv_",
+			"timeout_cb",
+			"uv_",
+			"free_res",
+			"uv_",
+			"\"options\"",
+			"endpoints_register",
+			"register_endpoint",
+			"init_chat_endpoint_implement",
+			"html",
+			"HTMLFILE_RESPONSE_MIDDLE",
+			"timeout_cb",
+			"ev_read",
+			"r",
+			"parser",
+			"write_cb",
+			"settings",
+			"on_url_cb",
+			"cli",
+			"write_cb",
+			"client_t"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"heartbeat_callback",
+			"trans_fn->timeout_callback",
+			"(",
+			"",
+			"#include \"socket_io.h\"",
+			"htmlfile_",
+			"jsonp_",
+			"hash",
+			"",
+			"ms->cnt",
+			"endpoint_hashs",
+			"endpoint_",
+			"\\n",
+			"trans_info->sessionid",
+			"common_http_output(",
+			"session_client_add",
+			"session_client_",
+			"session_client_hash_",
+			"session_client_hash"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "parseurl.c",
+					"settings":
+					{
+						"buffer_size": 4596,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3955,
+								3955
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": "warning",
+								"box-model": true,
+								"box-sizing": "warning",
+								"compatible-vendor-prefixes": "warning",
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": "warning",
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": "warning",
+								"overqualified-elements": "warning",
+								"qualified-headings": "warning",
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"star-property-hack": "warning",
+								"text-indent": "warning",
+								"underscore-property-hack": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": true,
+								"zero-units": "warning"
+							},
+							"encoding_helper_confidence": 1.0,
+							"encoding_helper_encoding": "UTF-8",
+							"encoding_helper_encoding_sublime": "UTF-8",
+							"gjslint_ignore":
+							[
+								110
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"browser": true,
+								"evil": true,
+								"regexdash": true,
+								"sub": true,
+								"trailing": true,
+								"wsh": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": true,
+							"sublimelinter_delay": 2,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/C++/C.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1485.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 36.0
+	},
+	"input":
+	{
+		"height": 33.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.clang":
+	{
+		"height": 219.0
+	},
+	"output.exec":
+	{
+		"height": 92.0
+	},
+	"replace":
+	{
+		"height": 66.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+			[
+				"ini",
+				"server.ini"
+			],
+			[
+				"req",
+				"handle_request.c"
+			],
+			[
+				"socket_io.c",
+				"socket_io.c"
+			],
+			[
+				"flash",
+				"flashsocket.c"
+			],
+			[
+				"tran",
+				"transport.h"
+			],
+			[
+				"html",
+				"htmlfile.c"
+			],
+			[
+				"socketioh",
+				"socket_io.h"
+			],
+			[
+				"jsonp",
+				"jsonp-polling.c"
+			],
+			[
+				"xhr",
+				"xhr-polling.c"
+			],
+			[
+				"requ",
+				"handle_request.c"
+			],
+			[
+				"socketioc",
+				"socket_io.c"
+			],
+			[
+				"socket.io.c",
+				"test/socket.io.c"
+			],
+			[
+				"client",
+				"client_session.c"
+			],
+			[
+				"transport.h",
+				"transport.h"
+			],
+			[
+				"store",
+				"store.c"
+			],
+			[
+				"re",
+				"handle_request.c"
+			],
+			[
+				"soc",
+				"socket_io.c"
+			],
+			[
+				"websocket.c",
+				"websocket.c"
+			],
+			[
+				"reque",
+				"handle_request.c"
+			],
+			[
+				"socketh",
+				"socket_io.h"
+			],
+			[
+				"handle",
+				"handle_request.c"
+			],
+			[
+				"handle_re",
+				"handle_request.c"
+			],
+			[
+				"todo",
+				"need.todo"
+			],
+			[
+				"statc",
+				"handle_static.c"
+			],
+			[
+				"make",
+				"Makefile"
+			],
+			[
+				"socket.h",
+				"socket_io.h"
+			],
+			[
+				"socket_",
+				"socket_io.c"
+			],
+			[
+				"mak",
+				"Makefile"
+			],
+			[
+				"",
+				"handle_request.c"
+			],
+			[
+				"flashsoc",
+				"flashsocket.c"
+			],
+			[
+				"makefil",
+				"Makefile"
+			],
+			[
+				"webserver.c",
+				"webserver.c"
+			],
+			[
+				"webserver.h",
+				"webserver.h"
+			],
+			[
+				"request",
+				"handle_request.c"
+			],
+			[
+				"cwebh",
+				"include/c-websocket/cWebSockets.h"
+			],
+			[
+				"cweb",
+				"include/c-websocket/cWebSockets.c"
+			],
+			[
+				"static",
+				"handle_static.c"
+			],
+			[
+				"fla",
+				"flashsocket.c"
+			],
+			[
+				"flas",
+				"flashsocket.c"
+			],
+			[
+				"cli",
+				"client_session.c"
+			],
+			[
+				"end",
+				"endpoints.c"
+			],
+			[
+				"ma",
+				"Makefile"
+			],
+			[
+				"h",
+				"handle_request.c"
+			],
+			[
+				"par",
+				"parseurl.c"
+			],
+			[
+				"chat.html",
+				"static/chat.html"
+			],
+			[
+				"web.h",
+				"webserver.h"
+			],
+			[
+				"web",
+				"webserver.h"
+			],
+			[
+				"chat.h",
+				"static/chat.html"
+			],
+			[
+				"webserver",
+				"webserver.h"
+			],
+			[
+				"chat.htm",
+				"static/chat.html"
+			],
+			[
+				"handl",
+				"handle_request.c"
+			],
+			[
+				"hand",
+				"handle_request.c"
+			],
+			[
+				"chat",
+				"chat_demo.c"
+			],
+			[
+				"chat2.",
+				"static/chat2.html"
+			],
+			[
+				"webe",
+				"webserver.c"
+			],
+			[
+				"chat2.html",
+				"static/chat2.html"
+			],
+			[
+				"chat.ht",
+				"static/chat.html"
+			],
+			[
+				"nee",
+				"need.todo"
+			],
+			[
+				"reques",
+				"handle_request.c"
+			],
+			[
+				"webs",
+				"webserver.c"
+			],
+			[
+				"server",
+				"server.ini"
+			],
+			[
+				"sto",
+				"store.h"
+			],
+			[
+				"ned",
+				"need.todo"
+			],
+			[
+				"tod",
+				"need.todo"
+			],
+			[
+				"webh",
+				"webserver.h"
+			],
+			[
+				"note",
+				"note.txt"
+			],
+			[
+				"parseu",
+				"parseurl.c"
+			],
+			[
+				"url",
+				"parseurl.c"
+			],
+			[
+				"server.i",
+				"server.ini"
+			],
+			[
+				"websocketc",
+				"websocket.c"
+			],
+			[
+				"rq",
+				"handle_request.c"
+			],
+			[
+				"ch",
+				"chat_demo.c"
+			],
+			[
+				"cha",
+				"chat_demo.c"
+			],
+			[
+				"webserverc",
+				"webserver.c"
+			],
+			[
+				"session",
+				"client_session.c"
+			],
+			[
+				"websoc",
+				"websocket.c"
+			],
+			[
+				"websc",
+				"webserver.c"
+			],
+			[
+				"r",
+				"handle_request.c"
+			],
+			[
+				"ser",
+				"server.ini"
+			],
+			[
+				"x",
+				"xhr-polling.c"
+			],
+			[
+				"ha",
+				"handle_request.c"
+			],
+			[
+				"http",
+				"http-parser/http_parser.c"
+			],
+			[
+				"ht",
+				"htmlfile.c"
+			],
+			[
+				"s",
+				"server.ini"
+			],
+			[
+				"m",
+				"Makefile"
+			],
+			[
+				"sini",
+				"server.ini"
+			],
+			[
+				"serini",
+				"server.ini"
+			],
+			[
+				"httpp",
+				"http-parser/http_parser.c"
+			],
+			[
+				"jspon",
+				"jsonp-polling.c"
+			],
+			[
+				"p",
+				"parseurl.c"
+			],
+			[
+				"stor",
+				"libuv/test/test-eio-overflow.c"
+			],
+			[
+				"we",
+				"webserver.c"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"selected_items":
+		[
+			[
+				"",
+				"/home/yongboy/Workspace/c_socket.io_server/c_socket.io_server.sublime-project"
+			]
+		],
+		"width": 380.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 331.0,
+	"status_bar_visible": true
+}

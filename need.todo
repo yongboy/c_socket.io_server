@@ -5,7 +5,7 @@ Tasks:
           ☐ websocket support 75/76/10/13
           ☐ handle the disconnect parameter within url
           ☐ how to receive exception siginal ...
-          ☐ chat demo handle connect/disconnect with null username
+          ✔ chat demo handle connect/disconnect with null username @done (13-03-06 15:09)
      
        Static File:
            ✔ serve big satic file @done (13-03-05 09:21)

@@ -1,6 +1,5 @@
-#include "socket.io_server.h"
+#include "../socket.io_server.h"
 
-/****/
 int main(int argc, char const *argv[]) {
     server_init();
 

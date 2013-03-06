@@ -31,19 +31,16 @@ void init_config() {
     global_config->heartbeat_timeout = g_key_file_get_integer(keyfile, "global", "heartbeat_timeout", NULL);
     global_config->close_timeout = g_key_file_get_integer(keyfile, "global", "close_timeout", NULL);
     global_config->heartbeat_interval = g_key_file_get_integer(keyfile, "global", "heartbeat_interval", NULL);
-    global_config->enable_flash_policy = g_key_file_get_integer(keyfile, "global", "enable_flash_policy", NULL);
-    global_config->flash_policy_port = g_key_file_get_integer(keyfile, "global", "flash_policy_port", NULL);
     global_config->static_path = g_key_file_get_string(keyfile, "global", "static_path", NULL);
 }
 
 char *gen_uuid(char *uuidBuff) {
     uuid_t uuid;
     int result = uuid_generate_time_safe(uuid);
-   /* if (result == 0) {
-        printf("uuid generated safely\n");
-    } else {
+    if (result) {
         printf("uuid not generated safely\n");
-    }*/
+    }
+
     uuid_unparse(uuid, uuidBuff);
 
     return uuidBuff;

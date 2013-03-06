@@ -4,8 +4,8 @@
 
 #include <glib.h>
 
-#include "store.h"
-#include "endpoint.h"
+#include "../store.h"
+#include "../endpoint.h"
 
 #define MAX_BUFF_SIZE 10240
 

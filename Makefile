@@ -6,4 +6,4 @@ http-parser/http_parser.o:
 
 clean:
 	make -C include/http-parser clean
-	rm webserver
+	rm socket.io_server

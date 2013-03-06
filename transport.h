@@ -22,9 +22,7 @@ static void init_connect(client_t *client, char *sessionid) {
      if(session){
         ev_timer *timeout = &session->close_timeout;
         ev_timer_stop(ev_default_loop(0), timeout);
-        printf("timeout->data is %s\n", timeout->data);
         g_free(timeout->data);
-        fprintf(stdout, "now stop close_timeout now for sessionid = %s...\n", sessionid);
      }
 }
 
@@ -40,7 +38,6 @@ static void end_connect(char *sessionid) {
     extern config *global_config;
     ev_timer_set(timeout, global_config->close_timeout, 0);
     ev_timer_start(ev_default_loop(0), timeout);
-    fprintf(stdout, "now set close_timeout now for sessionid = %s...\n", sessionid);
 }
 
 static void common_output_callback(session_t *session, int keep_long) {

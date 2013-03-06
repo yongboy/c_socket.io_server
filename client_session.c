@@ -52,8 +52,6 @@ void insert_msg_into_queue(char *sessionid, char *message) {
         } else {
             fprintf(stderr, "Got NO transport struct !\n");
         }
-    } else {
-        fprintf(stderr, "the session with id=%s has no client mapping !\n", sessionid);
     }
 }
 

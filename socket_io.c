@@ -208,7 +208,6 @@ void free_client(struct ev_loop *loop, client_t *client) {
         if (trans_info->sessionid) {
             session_t *session = store_lookup(trans_info->sessionid);
             if (session != NULL) {
-                fprintf(stdout, "set session's client value with NULL !\n");
                 session->client = NULL;
             }
         }

@@ -60,7 +60,7 @@ static void read_cb(struct ev_loop *loop, ev_io *w, int revents) {
     }
 
     if (len == 0) {
-        printf("client disconnected.\n");
+        printf("client disconnected with read buff len = 0.\n");
         handle_disconnected(client);
         free_res(loop, w);
         return;
@@ -83,6 +83,7 @@ static void read_cb(struct ev_loop *loop, ev_io *w, int revents) {
                 int result = WEBSOCKET_get_content(rbuff, len, dst, REQUEST_BUFFER_SIZE);
 
                 if (result == -2) {
+                    printf("websocket client close the connection now ...\n");
                     // handle disconnecting event ...
                     handle_disconnected(client);
                     fprintf(stderr, "now close the connection .............\n");

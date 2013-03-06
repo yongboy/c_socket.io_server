@@ -68,3 +68,21 @@ void notice_connect(message_fields *msg_fields, char *sessionid, char *post_msg)
 
     insert_msg_into_queue(sessionid, post_msg);
 }
+
+void notice_disconnect(message_fields *msg_fields, char *sessionid) {
+    session_t *session = store_lookup(sessionid);
+    if (!session) {
+        fprintf(stderr, "The sessionid %s has no value !\n", sessionid);
+        return;
+    }
+
+    session->state = DISCONNECTED_STATE;
+    client_t *client = session->client;
+    if (client) {
+        on_close(client);
+        session->client = NULL;
+    }
+
+    store_remove(sessionid);
+    g_free(session);
+}

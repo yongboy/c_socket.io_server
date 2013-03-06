@@ -144,6 +144,9 @@ static void on_message(const char *sessionid, const message_fields *msg_fields) 
 
 static void on_disconnect(const char *sessionid, const message_fields *msg_fields) {
     char *dis_username = session_nickname_lookup(sessionid);
+    if(!dis_username){
+        return;
+    }
 
     printf("%s has been disconnect now\n", sessionid);
 

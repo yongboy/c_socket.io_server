@@ -9,11 +9,9 @@ static GHashTable* _store_session_hash;
 // }
 
 static void value_destroyed(gpointer data) {
-    // g_printf("Got a GDestroyNotify Value callback\n");
 }
 
 static void key_destroyed(gpointer data) {
-    // g_printf("Got a GDestroyNotify Key callback\n");
 }
 
 void store_init(void){

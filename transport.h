@@ -22,6 +22,7 @@ static void init_connect(client_t *client, char *sessionid) {
      if(session){
         ev_timer *timeout = &session->close_timeout;
         ev_timer_stop(ev_default_loop(0), timeout);
+        printf("timeout->data is %s\n", timeout->data);
         g_free(timeout->data);
         fprintf(stdout, "now stop close_timeout now for sessionid = %s...\n", sessionid);
      }

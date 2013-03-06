@@ -66,7 +66,7 @@ void clear_handshake_cb(EV_P_ struct ev_timer *timer, int revents) {
     if (session) {
         if (session->state == CONNECTING_STATE) {
             store_remove(sessionid);
-            g_free(session);
+            /*g_free(session);*/
         }
     }
 
@@ -159,15 +159,18 @@ int handle_transport(client_t *client, const char *urlStr) {
     trans_fn->init_connect(client, trans_info->sessionid);
 
     if (strlen(body_msg) <= 0) {
+        ev_io_stop(ev_default_loop(0), &client->ev_read);
+        fprintf(stdout, "now just only output header now (global_config->heartbeat_interval = %d) ..\n", global_config->heartbeat_interval);
         trans_fn->output_header(client);
 
         client->timeout.data = client;
         ev_timer_init(&client->timeout, timeout_cb, global_config->heartbeat_interval, 0);
         ev_timer_start(ev_default_loop(0), &client->timeout);
-
+        printf("had set timeout end ...\n");
         return 0;
     }
 
+    printf("now output whole content(%s)\n", body_msg);
     trans_fn->output_whole(client, body_msg);
 
     return 0;
@@ -179,6 +182,9 @@ int on_url_cb(http_parser *parser, const char *at, size_t length) {
     if (!strcmp(urlStr, "/") || !strcmp(urlStr, "")) {
         strcpy(urlStr, "/index.html");
     }
+
+    fprintf(stdout, "request url is %s\n", urlStr);
+
     gchar *pattern_string = "^/([^/])*/\\d{1}/\\?t=\\d+.*?";
     if (check_match((gchar *)urlStr, pattern_string)) {
         return handle_handshake(parser);
@@ -208,6 +214,7 @@ int on_url_cb(http_parser *parser, const char *at, size_t length) {
 
         // check if exists hang-up connections
         if (session->client) {
+            fprintf(stderr, "the session's client had exist !\n");
             free_client(ev_default_loop(0), session->client);
             // is it right to free session->queue ?
             g_queue_free(session->queue);
@@ -233,6 +240,7 @@ int on_body_cb(http_parser *parser, const char *at, size_t length) {
 }
 
 int handle_body_cb(client_t *client, char *post_msg, void (*close_fn)(client_t *client)) {
+    printf("post_msg is %s\n", post_msg);
     transport_info *trans_info = &client->trans_info;
 
     if (strchr(post_msg, 'd') == post_msg) {
@@ -255,7 +263,9 @@ int handle_body_cb(client_t *client, char *post_msg, void (*close_fn)(client_t *
     int num = atoi(msg_fields.message_type);
     switch (num) {
     case 0:
+        printf("case 0 ......................\n");
         endpoint_impl->on_disconnect(trans_info->sessionid, &msg_fields);
+        notice_disconnect(&msg_fields, trans_info->sessionid);
         break;
     case 1:
         notice_connect(&msg_fields, trans_info->sessionid, post_msg);
@@ -275,7 +285,14 @@ int handle_body_cb(client_t *client, char *post_msg, void (*close_fn)(client_t *
         write_output(client, http_msg, close_fn);
     } else { // just for websocket
         // output message eg: "5::/chat:1";
-        sprintf(http_msg, "5::%s:1", msg_fields.endpoint);
+        if (strlen(msg_fields.endpoint) > 0) {
+            sprintf(http_msg, "5::%s:1", msg_fields.endpoint);
+        } else {
+            char *sessionid = trans_info->sessionid;
+            session_t *session = store_lookup(sessionid);
+            sprintf(http_msg, "5::%s:1", session->endpoint);
+        }
+
         trans_fn->output_body(client, http_msg);
     }
 
@@ -318,9 +335,14 @@ void handle_disconnected(client_t *client) {
     // something need to handle on_disconnected event ...
     if (session->endpoint) {
         endpoint_implement *endpoint_impl = endpoints_get(session->endpoint);
-        endpoint_impl->on_disconnect(sessionid, NULL);
+        if (endpoint_impl) {
+            endpoint_impl->on_disconnect(sessionid, NULL);
+        } else {
+            fprintf(stderr, "the endpoint_impl is null !\n");
+        }
     }
 
+    // set timeout for delete the session
     transports_fn *trans_fn = get_transport_fn(client);
     if (trans_fn) {
         trans_fn->end_connect(sessionid);

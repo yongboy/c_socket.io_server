@@ -1,4 +1,11 @@
 Tasks need to do list:
+
+Tasks:
+          ☐ xhr-polling, jsonp-polling encoding ...
+          ☐ websocket support 75/76/10/13
+          ☐ handle the disconnect parameter within url
+          ☐ how to receive exception siginal ...
+          ☐ chat demo handle connect/disconnect with null username
      
        Static File:
            ✔ serve big satic file @done (13-03-05 09:21)
@@ -9,8 +16,8 @@ Tasks need to do list:
            ✔ websocket heartbeat @done (13-02-23 20:18)
 
          Idle Watch:
-           ☐ delete session with state = disconnected-state(-2)
-           ☐ delete invalid session only have handshake
+           ✔ delete session with state = disconnected-state(-2) @done (13-03-06 09:10)
+           ✔ delete invalid session only have handshake @done (13-03-06 09:10)
          Websocket:
            ✔ don't write to client with some messages @done (13-02-23 20:17)
                顶顶顶顶的顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶的顶顶顶顶顶顶顶顶顶顶的顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶

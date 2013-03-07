@@ -3,12 +3,16 @@
 #include <string.h>
 #include <assert.h>
 #include <fcntl.h>
+#include <ctype.h>
+#include <stdbool.h>
 
 #include <uuid/uuid.h>
 #include "store.h"
 #include "socket_io.h"
 #include "endpoint.h"
 #include "transports.h"
+
+#define POLLING_FRAMEING_DELIM "\ufffd"
 
 config *global_config;
 void handle_disconnected(client_t *client);
@@ -218,13 +222,41 @@ int on_url_cb(http_parser *parser, const char *at, size_t length) {
     }
 }
 
+bool is_digital(const char *s) {
+    if (s == NULL)
+        return false;
+
+    if (strlen(s) == 0)
+        return false;
+
+    while (*s) {
+        if (!isdigit(*s++))
+            return false;
+    }
+
+    return true;
+}
+
 int on_body_cb(http_parser *parser, const char *at, size_t length) {
     client_t *client = parser->data;
 
     char post_msg[(int)length + 1];
     sprintf(post_msg, "%.*s", (int)length, at);
 
-    return handle_body_cb(client, post_msg, on_close);
+    //check multiple messages framing, eg: `\ufffd` [message lenth] `\ufffd`
+    if (strstr(post_msg, POLLING_FRAMEING_DELIM) == post_msg) {
+        char *str = strtok(post_msg, POLLING_FRAMEING_DELIM);
+        while (str != NULL) {
+            if (!is_digital(str)) {
+                handle_body_cb(client, str, on_close);
+            }
+            str = strtok(NULL, POLLING_FRAMEING_DELIM);
+        }
+    } else {
+        handle_body_cb(client, post_msg, on_close);
+    }
+
+    return 0;
 }
 
 int handle_body_cb(client_t *client, char *post_msg, void (*close_fn)(client_t *client)) {

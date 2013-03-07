@@ -221,21 +221,6 @@ int on_url_cb(http_parser *parser, const char *at, size_t length) {
     }
 }
 
-bool is_digital(const char *s) {
-    if (s == NULL)
-        return false;
-
-    if (strlen(s) == 0)
-        return false;
-
-    while (*s) {
-        if (!isdigit(*s++))
-            return false;
-    }
-
-    return true;
-}
-
 int on_body_cb(http_parser *parser, const char *at, size_t length) {
     client_t *client = parser->data;
 

@@ -4,8 +4,7 @@
 
 #include <glib.h>
 
-#include "../store.h"
-#include "../endpoint.h"
+#include "../endpoint_impl.h"
 
 #define MAX_BUFF_SIZE 10240
 
@@ -81,12 +80,11 @@ static void on_init(const char *endpoint) {
     endpoint_name = g_strdup(endpoint);
 }
 
-static void on_connect(const char *sessionid, const message_fields *msg_fields) {
+static void on_connect(const char *sessionid) {
     printf("%s has connect now\n", sessionid);
-    // notice_connect(sessionid);
 }
 
-static void on_message(const char *sessionid, const message_fields *msg_fields) {
+static void on_event(const char *sessionid, const message_fields *msg_fields) {
     if (strlen(msg_fields->message_id) > 0) {
         char messages[strlen(msg_fields->ori_data)];
         sprintf(messages, "6::%s:%s[false]", msg_fields->endpoint, msg_fields->message_id);
@@ -128,7 +126,6 @@ static void on_message(const char *sessionid, const message_fields *msg_fields) 
             nicknames_list[strlen(nicknames_list) - 1] = '\0';
         }
 
-        // some bug here ...
         char nicknames_msg[MAX_BUFF_SIZE] = "";
         sprintf(nicknames_msg, "%s::%s:{\"name\":\"nicknames\",\"args\":[{%s}]}", msg_fields->message_type, msg_fields->endpoint, nicknames_list);
         broadcast_clients(NULL, nicknames_msg);
@@ -178,7 +175,6 @@ static void on_disconnect(const char *sessionid, const message_fields *msg_field
         nicknames_list[strlen(nicknames_list) - 1] = '\0';
     }
 
-    // some bug here ...
     char nicknames_msg[MAX_BUFF_SIZE] = "";
     sprintf(nicknames_msg, "%s::%s:{\"name\":\"nicknames\",\"args\":[{%s}]}", "5", endpoint_name, nicknames_list);
     broadcast_clients(NULL, nicknames_msg);
@@ -189,15 +185,6 @@ static void on_destroy(const char *endpoint) {
     printf("%s has been destroy now\n", endpoint);
 }
 
-extern endpoint_implement *init_chat_endpoint_implement(char *endpoint_name) {
-    // endpoint_implement impl = {endpoint_name, on_init, on_connect, on_message, on_disconnect, on_destroy};
-    endpoint_implement *impl_point = malloc(sizeof(endpoint_implement));
-    impl_point->endpoint = g_strdup(endpoint_name);
-    impl_point->on_init = on_init;
-    impl_point->on_connect = on_connect;
-    impl_point->on_message = on_message;
-    impl_point->on_disconnect = on_disconnect;
-    impl_point->on_destroy = on_destroy;
-
-    return impl_point;
+extern endpoint_implement *init_chat_endpoint_implement(char *chat_endpoint_name) {
+    return init_default_endpoint_implement(chat_endpoint_name);
 }

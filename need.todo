@@ -1,7 +1,7 @@
 Tasks need to do list:
 
 Tasks:
-          ☐ xhr-polling, jsonp-polling encoding ...
+          ✔ xhr-polling, jsonp-polling encoding ... @done (13-03-07 10:18)
           ☐ websocket support 75/76/10/13
           ☐ handle the disconnect parameter within url
           ☐ how to receive exception siginal ...

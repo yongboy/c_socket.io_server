@@ -7,7 +7,6 @@
 #include <stdbool.h>
 
 #include <uuid/uuid.h>
-#include "store.h"
 #include "socket_io.h"
 #include "endpoint.h"
 #include "transports.h"
@@ -246,10 +245,12 @@ int on_body_cb(http_parser *parser, const char *at, size_t length) {
     //check multiple messages framing, eg: `\ufffd` [message lenth] `\ufffd`
     if (strstr(post_msg, POLLING_FRAMEING_DELIM) == post_msg) {
         char *str = strtok(post_msg, POLLING_FRAMEING_DELIM);
+        bool is_str = false;
         while (str != NULL) {
-            if (!is_digital(str)) {
+            if (is_str) {
                 handle_body_cb(client, str, on_close);
             }
+            is_str = !is_str;
             str = strtok(NULL, POLLING_FRAMEING_DELIM);
         }
     } else {
@@ -287,13 +288,22 @@ int handle_body_cb(client_t *client, char *post_msg, void (*close_fn)(client_t *
         break;
     case 1:
         notice_connect(&msg_fields, trans_info->sessionid, post_msg);
-        endpoint_impl->on_connect(trans_info->sessionid, &msg_fields);
+        endpoint_impl->on_connect(trans_info->sessionid);
         break;
     case 2:
         trans_fn->heartbeat_callback(client, trans_info->sessionid);
         break;
-    case 5:
+    case 3:
         endpoint_impl->on_message(trans_info->sessionid, &msg_fields);
+        break;
+    case 4:
+        endpoint_impl->on_json_message(trans_info->sessionid, &msg_fields);
+        break;
+    case 5:
+        endpoint_impl->on_event(trans_info->sessionid, &msg_fields);
+        break;
+    default:
+        endpoint_impl->on_other(trans_info->sessionid, &msg_fields);
         break;
     }
 

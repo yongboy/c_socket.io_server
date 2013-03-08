@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+<title>画板示范</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<!--Prevents iPhone, iPad, and touch devices from scrolling or zooming when touched-->
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+<link rel="stylesheet" type="text/css" media="all" href="css/style.css" />
+<!--[if lt IE 9]>
+<script src="js/excanvas.js"></script>
+<![endif]-->
+<script src="socket.io/socket.io.js"></script>
+<script type="text/javascript">
+var roomID = "myRoom";
+var currentClientId = new Date().getTime();
+var connUrl = '/whiteboard';
+var connOptions = {};
+</script>
+<script src="js/canvasdraw.js"></script>
+<script src="js/canvas-socketio.js"></script>
+<script src="js/canvas-menu.js"></script>
+<script src="js/canvas-touch.js"></script>
+</head>
+<body>
+  <div id="controls">
+  <input type="button" id="pencil" value="Pencil" />
+    Size:
+    <select id="thickness" class="fixed">
+      <option value="1" selected="selected">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="10">10</option>
+      <option value="20">20</option>
+    </select>
+    Color:
+    <select id="color">
+      <option value="#FFFFFF">#FFFFFF</option>
+      <option value="#AAAAAA" selected="selected">#AAAAAA</option>
+      <option value="#666666">#666666</option>
+      <option value="#000000">#000000</option>
+      <option value="#9BA16C">#9BA16C</option>
+      <option value="#CC8F2B">#CC8F2B</option>
+      <option value="#63631D">#63631D</option>
+    </select>
+    <input type="button" id="eraser" value="Eraser" />
+    &nbsp;
+	<input type="button" id="clear" value="Clear" />
+  </div>
+  <!--The canvas where drawings will be displayed-->
+  <canvas id="canvas" style="cursor: url(img/pencil.cur), default;"></canvas>
+  <div id="status">Loading ...</div>
+</body>
+</html>

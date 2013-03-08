@@ -15,6 +15,7 @@
 
 config *global_config;
 void handle_disconnected(client_t *client);
+int handle_body_cb_one(client_t *client, char *post_msg, void (*close_fn)(client_t *client), bool need_close_fn);
 
 void init_config() {
     GKeyFile *keyfile;
@@ -233,11 +234,15 @@ int on_body_cb(http_parser *parser, const char *at, size_t length) {
         bool is_str = false;
         while (str != NULL) {
             if (is_str) {
-                handle_body_cb(client, str, on_close);
+                handle_body_cb_one(client, str, NULL, false);
             }
             is_str = !is_str;
             str = strtok(NULL, POLLING_FRAMEING_DELIM);
         }
+
+        char http_msg[200];
+        sprintf(http_msg, RESPONSE_PLAIN, 1, "1");
+        write_output(client, http_msg, on_close);
     } else {
         handle_body_cb(client, post_msg, on_close);
     }
@@ -245,7 +250,7 @@ int on_body_cb(http_parser *parser, const char *at, size_t length) {
     return 0;
 }
 
-int handle_body_cb(client_t *client, char *post_msg, void (*close_fn)(client_t *client)) {
+int handle_body_cb_one(client_t *client, char *post_msg, void (*close_fn)(client_t *client), bool need_close_fn) {
     transport_info *trans_info = &client->trans_info;
 
     if (strchr(post_msg, 'd') == post_msg) {
@@ -292,24 +297,29 @@ int handle_body_cb(client_t *client, char *post_msg, void (*close_fn)(client_t *
         break;
     }
 
-    char http_msg[200];
-    if (close_fn) {
-        sprintf(http_msg, RESPONSE_PLAIN, 1, "1");
-        write_output(client, http_msg, close_fn);
-    } else { // just for websocket
-        // output message eg: "5::/chat:1";
-        if (strlen(msg_fields.endpoint) > 0) {
-            sprintf(http_msg, "5::%s:1", msg_fields.endpoint);
-        } else {
-            char *sessionid = trans_info->sessionid;
-            session_t *session = store_lookup(sessionid);
-            sprintf(http_msg, "5::%s:1", session->endpoint);
-        }
+    if (need_close_fn) {
+        char http_msg[200];
+        if (close_fn) {
+            sprintf(http_msg, RESPONSE_PLAIN, 1, "1");
+            write_output(client, http_msg, close_fn);
+        } else { // just for websocket, output message eg: "5::/chat:1";
+            if (strlen(msg_fields.endpoint) > 0) {
+                sprintf(http_msg, "5::%s:1", msg_fields.endpoint);
+            } else {
+                char *sessionid = trans_info->sessionid;
+                session_t *session = store_lookup(sessionid);
+                sprintf(http_msg, "5::%s:1", session->endpoint);
+            }
 
-        trans_fn->output_body(client, http_msg);
+            trans_fn->output_body(client, http_msg);
+        }
     }
 
     return 0;
+}
+
+int handle_body_cb(client_t *client, char *post_msg, void (*close_fn)(client_t *client)) {
+    return handle_body_cb_one(client, post_msg, close_fn, true);
 }
 
 void handle_disconnected(client_t *client) {

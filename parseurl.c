@@ -43,7 +43,7 @@ transport_info *url_2_struct(gchar *input_string, transport_info *trans_info) {
 
         if(trans_info->i && strstr(trans_info->i, "i=")){
             char *new_val = g_strdup(trans_info->i + 2);
-            g_free(trans_info->i);
+            free(trans_info->i);
             trans_info->i = new_val;
         }
     } else {
@@ -84,7 +84,7 @@ void *body_2_struct(gchar *post_string, message_fields *msg_fields) {
 static gchar *get_match_result(GMatchInfo *match_info, gint index) {
     gchar *match = g_match_info_fetch(match_info, index);
     gchar *result = g_strdup(match);
-    g_free(match);
+    free(match);
 
     return result;
 }

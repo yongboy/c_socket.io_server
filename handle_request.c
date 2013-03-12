@@ -11,7 +11,6 @@
 #include "endpoint.h"
 #include "transports.h"
 #include "safe_mem.h"
-#include "memwatch/memwatch.h"
 
 #define POLLING_FRAMEING_DELIM "\ufffd"
 
@@ -257,7 +256,7 @@ int on_body_cb(http_parser *parser, const char *at, size_t length) {
     char post_msg[(int)length + 1];
     sprintf(post_msg, "%.*s", (int)length, at);
 
-    if (strchr(post_msg, 'd') == post_msg) {
+    if (post_msg[0] == 'd') {
         char *unescape_string = g_uri_unescape_string(post_msg, NULL);
         gchar *result = g_strcompress(unescape_string);
         char target[strlen(result) - 4];

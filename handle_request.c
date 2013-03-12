@@ -54,7 +54,6 @@ char *gen_uuid(char *uuidBuff) {
 }
 
 void clear_handshake_cb(EV_P_ struct ev_timer *timer, int revents) {
-    printf("clear_handshake_cb here ...\n");
     if (EV_ERROR & revents) {
         printf("error event in timer_beat\n");
         return ;
@@ -75,32 +74,30 @@ void clear_handshake_cb(EV_P_ struct ev_timer *timer, int revents) {
         session->state = DISCONNECTING_STATE;
         // something need to handle on_disconnected event ...
         if (session->endpoint) {
-            fprintf(stderr, "session's endpoint is %s and sessionid is %s\n", session->endpoint, session->sessionid);
+            /*fprintf(stderr, "session's endpoint is %s and sessionid is %s\n", session->endpoint, session->sessionid);*/
             endpoint_implement *endpoint_impl = endpoints_get(session->endpoint);
             if (endpoint_impl) {
-                printf("call endpoint_impl->on_disconnect here ...\n");
+                /*printf("call endpoint_impl->on_disconnect here ...\n");*/
                 endpoint_impl->on_disconnect(sessionid, NULL);
             } else {
                 fprintf(stderr, "the endpoint_impl is null !\n");
             }
-        }else{
+        } else {
             fprintf(stderr, "session's (null)endpoint is %s and sessionid is %s\n", session->endpoint, session->sessionid);
         }
-
-        /*if (session->state == CONNECTING_STATE) {*/
-        fprintf(stdout, "now delete session now with state = %d ...\n", session->state);
-        if (sessionid == NULL) {
-            printf("sessionid is NULL!\n");
-        } else {
-            store_remove(sessionid);
-        }
-        /*g_free(session);*/
-        /*}*/
     }
 
     if (timer) {
         free(timer->data);
         ev_timer_stop(ev_default_loop(0), timer);
+
+        store_remove(sessionid);
+
+        free(session->sessionid);
+        free(session->client);
+        g_queue_free(session->queue);
+        free(session->endpoint);
+        free(session);
     } else {
         printf("time is NULL !\n");
     }
@@ -109,7 +106,6 @@ void clear_handshake_cb(EV_P_ struct ev_timer *timer, int revents) {
 int handle_handshake(http_parser *parser) {
     char uuidBuff[36];
     gen_uuid(uuidBuff);
-    fprintf(stderr, "gen sessionid is %s\n", uuidBuff);
 
     session_t *session = malloc(sizeof(session_t));
     session->sessionid = g_strdup(uuidBuff);
@@ -177,7 +173,7 @@ int handle_transport(client_t *client, const char *urlStr) {
     if (!trans_fn) {
         fprintf(stderr, "Got no transport struct !\n");
         write_output(client, RESPONSE_400, on_close);
-        
+
         return 0;
     }
 
@@ -321,11 +317,11 @@ int handle_body_cb_one(client_t *client, char *post_msg, void (*close_fn)(client
             notice_disconnect(&msg_fields, trans_info->sessionid);
             break;
         case 1:
-            if(session->state != CONNECTED_STATE){
+            if (session->state != CONNECTED_STATE) {
                 /*printf("endpoint is %s, sessionid is %s, post_msg is %s\n", msg_fields.endpoint, trans_info->sessionid, post_msg);*/
                 notice_connect(&msg_fields, trans_info->sessionid, post_msg);
                 endpoint_impl->on_connect(trans_info->sessionid);
-            }else{
+            } else {
                 fprintf(stderr, "invalid state is %d endpoint is %s, sessionid is %s, post_msg is %s\n", session->state, msg_fields.endpoint, trans_info->sessionid, post_msg);
             }
             break;

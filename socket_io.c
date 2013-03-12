@@ -210,7 +210,8 @@ void free_client(struct ev_loop *loop, client_t *client) {
 
     close(client->fd);
 
-    g_free(client);
+    if(client)
+        free(client);
 }
 
 static void free_res(struct ev_loop *loop, ev_io *w) {

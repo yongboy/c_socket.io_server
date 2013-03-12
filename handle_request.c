@@ -10,6 +10,8 @@
 #include "socket_io.h"
 #include "endpoint.h"
 #include "transports.h"
+#include "safe_mem.h"
+#include "memwatch/memwatch.h"
 
 #define POLLING_FRAMEING_DELIM "\ufffd"
 
@@ -32,8 +34,9 @@ void init_config() {
 
     global_config = malloc(sizeof(config));
     global_config->transports = g_key_file_get_string(keyfile, "global", "transports", NULL);
-    global_config->heartbeat_timeout = g_key_file_get_integer(keyfile, "global", "heartbeat_timeout", NULL);
-    global_config->close_timeout = g_key_file_get_integer(keyfile, "global", "close_timeout", NULL);
+    global_config->heartbeat_timeout = g_key_file_get_integer(keyfile, "global", "heartbeat_timeout", 60);
+    global_config->close_timeout = g_key_file_get_integer(keyfile, "global", "close_timeout", 60);
+    global_config->server_close_timeout = g_key_file_get_integer(keyfile, "global", "server_close_timeout", 5);
     global_config->heartbeat_interval = g_key_file_get_integer(keyfile, "global", "heartbeat_interval", NULL);
     global_config->static_path = g_key_file_get_string(keyfile, "global", "static_path", NULL);
 }
@@ -51,6 +54,7 @@ char *gen_uuid(char *uuidBuff) {
 }
 
 void clear_handshake_cb(EV_P_ struct ev_timer *timer, int revents) {
+    printf("clear_handshake_cb here ...\n");
     if (EV_ERROR & revents) {
         printf("error event in timer_beat\n");
         return ;
@@ -62,22 +66,50 @@ void clear_handshake_cb(EV_P_ struct ev_timer *timer, int revents) {
     }
 
     char *sessionid = timer->data;
+    if (sessionid == NULL) {
+        return;
+    }
 
     session_t *session = store_lookup(sessionid);
     if (session) {
-        if (session->state == CONNECTING_STATE) {
-            store_remove(sessionid);
-            /*g_free(session);*/
+        session->state = DISCONNECTING_STATE;
+        // something need to handle on_disconnected event ...
+        if (session->endpoint) {
+            fprintf(stderr, "session's endpoint is %s and sessionid is %s\n", session->endpoint, session->sessionid);
+            endpoint_implement *endpoint_impl = endpoints_get(session->endpoint);
+            if (endpoint_impl) {
+                printf("call endpoint_impl->on_disconnect here ...\n");
+                endpoint_impl->on_disconnect(sessionid, NULL);
+            } else {
+                fprintf(stderr, "the endpoint_impl is null !\n");
+            }
+        }else{
+            fprintf(stderr, "session's (null)endpoint is %s and sessionid is %s\n", session->endpoint, session->sessionid);
         }
+
+        /*if (session->state == CONNECTING_STATE) {*/
+        fprintf(stdout, "now delete session now with state = %d ...\n", session->state);
+        if (sessionid == NULL) {
+            printf("sessionid is NULL!\n");
+        } else {
+            store_remove(sessionid);
+        }
+        /*g_free(session);*/
+        /*}*/
     }
 
-    g_free(timer->data);
-    ev_timer_stop(ev_default_loop(0), timer);
+    if (timer) {
+        free(timer->data);
+        ev_timer_stop(ev_default_loop(0), timer);
+    } else {
+        printf("time is NULL !\n");
+    }
 }
 
 int handle_handshake(http_parser *parser) {
     char uuidBuff[36];
     gen_uuid(uuidBuff);
+    fprintf(stderr, "gen sessionid is %s\n", uuidBuff);
 
     session_t *session = malloc(sizeof(session_t));
     session->sessionid = g_strdup(uuidBuff);
@@ -88,7 +120,7 @@ int handle_handshake(http_parser *parser) {
 
     ev_timer *timeout = &session->close_timeout;
     timeout->data = g_strdup(uuidBuff);
-    ev_timer_init(timeout, clear_handshake_cb, global_config->close_timeout, 0);
+    ev_timer_init(timeout, clear_handshake_cb, global_config->server_close_timeout, 0);
     ev_timer_start(ev_default_loop(0), timeout);
 
     store_add(uuidBuff, session);
@@ -136,12 +168,16 @@ int handle_transport(client_t *client, const char *urlStr) {
     transport_info *trans_info = &client->trans_info;
     if (trans_info == NULL) {
         fprintf(stderr, "GOT NULLL MATCH!");
+        write_output(client, RESPONSE_400, on_close);
+
         return 0;
     }
 
     transports_fn *trans_fn = get_transport_fn(client);
     if (!trans_fn) {
         fprintf(stderr, "Got no transport struct !\n");
+        write_output(client, RESPONSE_400, on_close);
+        
         return 0;
     }
 
@@ -167,6 +203,7 @@ int handle_transport(client_t *client, const char *urlStr) {
         ev_timer_start(ev_default_loop(0), &client->timeout);
         return 0;
     }
+
     trans_fn->output_whole(client, body_msg);
 
     return 0;
@@ -194,13 +231,8 @@ int on_url_cb(http_parser *parser, const char *at, size_t length) {
         session_t *session = store_lookup(trans_info->sessionid);
         // need to handle the session is NULL
         if (session == NULL) {
-            // '7::' [endpoint] ':' [reason] '+' [advice]
-            // 401 Unauthorized
-            char headStr[200] = "";
-            strcat(headStr, "HTTP/1.1 401 Unauthorized\r\n");
-            strcat(headStr, "\r\n");
-            write_output(client, headStr, on_close);
-
+            // output ? '7::' [endpoint] ':' [reason] '+' [advice]
+            write_output(client, RESPONSE_400, on_close);
             return 0;
         }
 
@@ -252,6 +284,12 @@ int on_body_cb(http_parser *parser, const char *at, size_t length) {
 
 int handle_body_cb_one(client_t *client, char *post_msg, void (*close_fn)(client_t *client), bool need_close_fn) {
     transport_info *trans_info = &client->trans_info;
+    if (trans_info == NULL) {
+        fprintf(stderr, "handle_body_cb_one's trans_info is NULL!\n");
+        write_output(client, RESPONSE_400, on_close);
+
+        return 0;
+    }
 
     if (strchr(post_msg, 'd') == post_msg) {
         char *unescape_string = g_uri_unescape_string(post_msg, NULL);
@@ -261,40 +299,57 @@ int handle_body_cb_one(client_t *client, char *post_msg, void (*close_fn)(client
         target[strlen(target) - 1] = '\0';
 
         strcpy(post_msg, target);
-        g_free(result);
+        free(result);
     }
 
     message_fields msg_fields;
     body_2_struct(post_msg, &msg_fields);
+    if (msg_fields.endpoint == NULL) {
+        fprintf(stderr, "msg_fields.endpoint is NULL and the post_msg is %s\n", post_msg);
+        /*return 0;*/
+    }
 
-    endpoint_implement *endpoint_impl = endpoints_get(msg_fields.endpoint);
     transports_fn *trans_fn = get_transport_fn(client);
+    char *sessionid = trans_info->sessionid;
+    session_t *session = store_lookup(sessionid);
+    endpoint_implement *endpoint_impl = endpoints_get(msg_fields.endpoint);
+    if (endpoint_impl) {
+        int num = atoi(msg_fields.message_type);
+        switch (num) {
+        case 0:
+            endpoint_impl->on_disconnect(trans_info->sessionid, &msg_fields);
+            notice_disconnect(&msg_fields, trans_info->sessionid);
+            break;
+        case 1:
+            if(session->state != CONNECTED_STATE){
+                /*printf("endpoint is %s, sessionid is %s, post_msg is %s\n", msg_fields.endpoint, trans_info->sessionid, post_msg);*/
+                notice_connect(&msg_fields, trans_info->sessionid, post_msg);
+                endpoint_impl->on_connect(trans_info->sessionid);
+            }else{
+                fprintf(stderr, "invalid state is %d endpoint is %s, sessionid is %s, post_msg is %s\n", session->state, msg_fields.endpoint, trans_info->sessionid, post_msg);
+            }
+            break;
+        case 2:
+            trans_fn->heartbeat_callback(client, trans_info->sessionid);
+            break;
+        case 3:
+            endpoint_impl->on_message(trans_info->sessionid, &msg_fields);
+            break;
+        case 4:
+            endpoint_impl->on_json_message(trans_info->sessionid, &msg_fields);
+            break;
+        case 5:
+            endpoint_impl->on_event(trans_info->sessionid, &msg_fields);
+            break;
+        default:
+            endpoint_impl->on_other(trans_info->sessionid, &msg_fields);
+            break;
+        }
+    } else {
+        fprintf(stderr, "handle_body_cb_one's endpoint_impl is NULL and the post_msg is %s !\n", post_msg);
+        write_output(client, RESPONSE_400, on_close);
 
-    int num = atoi(msg_fields.message_type);
-    switch (num) {
-    case 0:
-        endpoint_impl->on_disconnect(trans_info->sessionid, &msg_fields);
-        notice_disconnect(&msg_fields, trans_info->sessionid);
-        break;
-    case 1:
-        notice_connect(&msg_fields, trans_info->sessionid, post_msg);
-        endpoint_impl->on_connect(trans_info->sessionid);
-        break;
-    case 2:
-        trans_fn->heartbeat_callback(client, trans_info->sessionid);
-        break;
-    case 3:
-        endpoint_impl->on_message(trans_info->sessionid, &msg_fields);
-        break;
-    case 4:
-        endpoint_impl->on_json_message(trans_info->sessionid, &msg_fields);
-        break;
-    case 5:
-        endpoint_impl->on_event(trans_info->sessionid, &msg_fields);
-        break;
-    default:
-        endpoint_impl->on_other(trans_info->sessionid, &msg_fields);
-        break;
+        return 0;
     }
 
     if (need_close_fn) {
@@ -306,8 +361,6 @@ int handle_body_cb_one(client_t *client, char *post_msg, void (*close_fn)(client
             if (strlen(msg_fields.endpoint) > 0) {
                 sprintf(http_msg, "5::%s:1", msg_fields.endpoint);
             } else {
-                char *sessionid = trans_info->sessionid;
-                session_t *session = store_lookup(sessionid);
                 sprintf(http_msg, "5::%s:1", session->endpoint);
             }
 
@@ -323,6 +376,7 @@ int handle_body_cb(client_t *client, char *post_msg, void (*close_fn)(client_t *
 }
 
 void handle_disconnected(client_t *client) {
+    printf("handle_disconnected here ...\n");
     if (client == NULL) {
         fprintf(stderr, "the client is NULL !\n");
         return;
@@ -333,6 +387,7 @@ void handle_disconnected(client_t *client) {
         return;
     }
     if (parser && parser->method == HTTP_POST) {
+        printf("parser && parser->method == HTTP_POST is true!\n");
         return;
     }
 
@@ -344,11 +399,13 @@ void handle_disconnected(client_t *client) {
 
     char *sessionid = trans_info->sessionid;
     if (sessionid == NULL) {
+        fprintf(stderr, "handle_disconnected's the sessionid is NULL\n");
         return;
     }
 
     session_t *session = store_lookup(sessionid);
     if (session == NULL) {
+        fprintf(stderr, "handle_disconnected's the session is NULL\n");
         return;
     }
 

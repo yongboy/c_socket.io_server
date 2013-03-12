@@ -79,7 +79,6 @@ static void on_init(const char *endpoint) {
 }
 
 static void on_connect(const char *sessionid) {
-    printf("A user connected :: %s\n", sessionid);
     char messages[strlen(sessionid) + 50];
     sprintf(messages, "5::%s:{\"name\":\"clientId\",\"args\":[{\"id\":\"%s\"}]}", endpoint_name, sessionid);
 
@@ -91,7 +90,6 @@ static void send_it(char *session_id, char *messaage) {
 }
 
 static void on_event(const char *sessionid, const message_fields *msg_fields) {
-    /*fprintf(stdout, "Got a message :: %s :: echoing it back to :: %s\n", msg_fields->message_data, sessionid);*/
     event_message event_msg;
     if (!message_2_struct(msg_fields->message_data, &event_msg)) {
         fprintf(stderr, "%s Parse Message Error !\n", msg_fields->ori_data);
@@ -131,8 +129,6 @@ static void on_event(const char *sessionid, const message_fields *msg_fields) {
 }
 
 static void on_disconnect(const char *sessionid, const message_fields *msg_fields) {
-    printf("A user disconnected :: %s :: hope it was fun\n", sessionid);
-
     char *room_id = (char *)hashtable_lookup(sessionid);
     if (room_id == NULL) {
         fprintf(stderr, "the room_id is NULL\n");
@@ -142,17 +138,17 @@ static void on_disconnect(const char *sessionid, const message_fields *msg_field
     char notice_msg[strlen(endpoint_name) + strlen(room_id) + 70];
     GPtrArray *list = (GPtrArray *)hashtable_lookup(room_id);
     sprintf(notice_msg, "5::%s:{\"name\":\"roomCount\",\"args\":[{\"room\":\"%s\",\"num\":%d}]}", endpoint_name, room_id, list->len - 1);
-    int i;
+    int i, remove_index;
     for (i = 0; i < list->len; i++) {
         char *session_id = g_ptr_array_index(list, i);
         if (strcmp(session_id, sessionid) == 0) {
-            g_ptr_array_remove_index(list, i);
-            free(session_id);
+            remove_index = i;
             continue;
         }
 
         send_msg(session_id, notice_msg);
     }
+    g_ptr_array_remove_index(list, remove_index);
 
     hashtable_remove(sessionid);
     free(room_id);

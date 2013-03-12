@@ -18,7 +18,7 @@ static char *event_message_reg = "\\{\\\\?\"name\\\\?\":\\\\?\"(.*?)\\\\?\",\\\\
 static gchar *get_match_result(GMatchInfo *match_info, gint index) {
     gchar *match = g_match_info_fetch(match_info, index);
     gchar *result = g_strdup(match);
-    g_free(match);
+    free(match);
 
     return result;
 }
@@ -89,7 +89,7 @@ static void on_event(const char *sessionid, const message_fields *msg_fields) {
         char messages[strlen(msg_fields->ori_data)];
         sprintf(messages, "6::%s:%s[false]", msg_fields->endpoint, msg_fields->message_id);
         // "6::/chat:1+[false]"
-        insert_msg_into_queue(sessionid, messages);
+        send_msg(sessionid, messages);
     }
 
     event_message event_msg;
@@ -140,12 +140,12 @@ static void on_event(const char *sessionid, const message_fields *msg_fields) {
 }
 
 static void on_disconnect(const char *sessionid, const message_fields *msg_fields) {
+    printf("%s has been disconnect now\n", sessionid);
+
     char *dis_username = session_nickname_lookup(sessionid);
     if(!dis_username){
         return;
     }
-
-    printf("%s has been disconnect now\n", sessionid);
 
     char connect_msg[MAX_BUFF_SIZE] = "";
     sprintf(connect_msg, "%s::%s:{\"name\":\"announcement\",\"args\":[\"%s diconnected\"]}", "5", endpoint_name, dis_username);

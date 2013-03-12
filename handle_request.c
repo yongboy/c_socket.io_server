@@ -95,7 +95,8 @@ void clear_handshake_cb(EV_P_ struct ev_timer *timer, int revents) {
 
         free(session->sessionid);
         free(session->client);
-        g_queue_free(session->queue);
+        if(session->queue)
+            g_queue_free(session->queue);
         free(session->endpoint);
         free(session);
     } else {
@@ -256,6 +257,17 @@ int on_body_cb(http_parser *parser, const char *at, size_t length) {
     char post_msg[(int)length + 1];
     sprintf(post_msg, "%.*s", (int)length, at);
 
+    if (strchr(post_msg, 'd') == post_msg) {
+        char *unescape_string = g_uri_unescape_string(post_msg, NULL);
+        gchar *result = g_strcompress(unescape_string);
+        char target[strlen(result) - 4];
+        strncpy(target, result + 3, strlen(result));
+        target[strlen(target) - 1] = '\0';
+
+        strcpy(post_msg, target);
+        free(result);
+    }
+    
     //check multiple messages framing, eg: `\ufffd` [message lenth] `\ufffd`
     if (strstr(post_msg, POLLING_FRAMEING_DELIM) == post_msg) {
         char *str = strtok(post_msg, POLLING_FRAMEING_DELIM);
@@ -285,17 +297,6 @@ int handle_body_cb_one(client_t *client, char *post_msg, void (*close_fn)(client
         write_output(client, RESPONSE_400, on_close);
 
         return 0;
-    }
-
-    if (strchr(post_msg, 'd') == post_msg) {
-        char *unescape_string = g_uri_unescape_string(post_msg, NULL);
-        gchar *result = g_strcompress(unescape_string);
-        char target[strlen(result) - 4];
-        strncpy(target, result + 3, strlen(result));
-        target[strlen(target) - 1] = '\0';
-
-        strcpy(post_msg, target);
-        free(result);
     }
 
     message_fields msg_fields;

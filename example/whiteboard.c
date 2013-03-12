@@ -6,8 +6,6 @@
 
 #include "../endpoint_impl.h"
 
-#define MAX_BUFF_SIZE 10240
-
 typedef struct {
     char *event_name;
     char *event_args;
@@ -85,11 +83,11 @@ static void on_connect(const char *sessionid) {
     char messages[strlen(sessionid) + 50];
     sprintf(messages, "5::%s:{\"name\":\"clientId\",\"args\":[{\"id\":\"%s\"}]}", endpoint_name, sessionid);
 
-    insert_msg_into_queue(sessionid, messages);
+    send_msg(sessionid, messages);
 }
 
-static void send_all(char *session_id, char *messaage) {
-    insert_msg_into_queue(session_id, messaage);
+static void send_it(char *session_id, char *messaage) {
+    send_msg(session_id, messaage);
 }
 
 static void on_event(const char *sessionid, const message_fields *msg_fields) {
@@ -113,8 +111,8 @@ static void on_event(const char *sessionid, const message_fields *msg_fields) {
         char messages[strlen(sessionid) + 200];
         sprintf(messages, "5::%s:{\"name\":\"roomCount\",\"args\":[{\"room\":\"%s\",\"num\":%d}]}", endpoint_name, target_room_id, room_count);
 
-        hashtable_add(sessionid, g_strdup(target_room_id));
-        g_ptr_array_foreach(list, (GFunc)send_all, messages);
+        hashtable_add(g_strdup(sessionid), g_strdup(target_room_id));
+        g_ptr_array_foreach(list, (GFunc)send_it, messages);
         return;
     }
 
@@ -122,18 +120,13 @@ static void on_event(const char *sessionid, const message_fields *msg_fields) {
     sprintf(messages, "5::%s:{\"name\":\"%s\",\"args\":[%s]}", endpoint_name, event_msg.event_name, event_msg.event_args);
     char *target_room_id = (char *)hashtable_lookup(sessionid);
     GPtrArray *list = (GPtrArray *)hashtable_lookup(target_room_id);
+    int i;
+    for (i = 0; i < list->len; i++) {
+        char *session_id = g_ptr_array_index(list, i);
+        if (strcmp(session_id, sessionid) == 0)
+            continue;
 
-    if (list) {
-        int i;
-        for (i = 0; i < list->len; i++) {
-            char *session_id = g_ptr_array_index(list, i);
-            if (strcmp(session_id, sessionid) == 0)
-                continue;
-
-            insert_msg_into_queue(session_id, messages);
-        }
-    } else {
-        fprintf(stderr, "got list is NULL !\n");
+        send_msg(session_id, messages);
     }
 }
 
@@ -146,35 +139,31 @@ static void on_disconnect(const char *sessionid, const message_fields *msg_field
         return;
     }
 
-    char connect_msg[1000] = "";
+    char notice_msg[strlen(endpoint_name) + strlen(room_id) + 70];
     GPtrArray *list = (GPtrArray *)hashtable_lookup(room_id);
-    sprintf(connect_msg, "5::%s:{\"name\":\"roomCount\",\"args\":[{\"room\":\"%s\",\"num\":%d}]}", endpoint_name, room_id, list->len);
-
+    sprintf(notice_msg, "5::%s:{\"name\":\"roomCount\",\"args\":[{\"room\":\"%s\",\"num\":%d}]}", endpoint_name, room_id, list->len - 1);
     int i;
     for (i = 0; i < list->len; i++) {
         char *session_id = g_ptr_array_index(list, i);
-        if (strlen(session_id) == 0)
-            continue;
-
-        if (strcmp(sessionid, session_id) == 0) {
-            g_ptr_array_remove(list, i);
-            g_free(session_id);
+        if (strcmp(session_id, sessionid) == 0) {
+            g_ptr_array_remove_index(list, i);
+            free(session_id);
             continue;
         }
 
-        insert_msg_into_queue(session_id, connect_msg);
+        send_msg(session_id, notice_msg);
     }
 
     hashtable_remove(sessionid);
-    g_free(room_id);
+    free(room_id);
 }
 
 static void on_destroy(const char *endpoint) {
-    hashtable_destroy();
-    g_free(endpoint_name);
     printf("%s has been destroy now\n", endpoint);
+    hashtable_destroy();
+    free(endpoint_name);
 }
 
-extern endpoint_implement *init_whiteboard_endpoint_implement(char *chat_endpoint_name) {
-    return init_default_endpoint_implement(chat_endpoint_name);
+extern endpoint_implement *init_whiteboard_endpoint_implement(char *endpoint_name) {
+    return init_default_endpoint_implement(endpoint_name);
 }

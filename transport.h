@@ -6,6 +6,8 @@
 
 #include "store.h"
 #include "socket_io.h"
+#include "safe_mem.h"
+#include "memwatch/memwatch.h"
 
 static void output_callback(session_t *session);
 static void output_header(client_t *client);
@@ -21,22 +23,31 @@ static void init_connect(client_t *client, char *sessionid) {
      session_t *session = (session_t *)store_lookup(sessionid);
      if(session){
         ev_timer *timeout = &session->close_timeout;
+        if(timeout == NULL){
+            fprintf(stderr, "init_connect time is NULL!\n");
+            return;
+        }
         ev_timer_stop(ev_default_loop(0), timeout);
-        g_free(timeout->data);
+        free(timeout->data);
      }
 }
 
 static void end_connect(char *sessionid) {
     session_t *session = (session_t *)store_lookup(sessionid);
-    if(!session){
+    if(session == NULL){
+        fprintf(stderr, "the end_connect session is NULL!\n");
         return;
     }
 
     ev_timer *timeout = &session->close_timeout;
+    if(timeout == NULL){
+        fprintf(stderr, "end_connect timeout is NULL!\n");
+        return;
+    }
     timeout->data = g_strdup(sessionid);
 
     extern config *global_config;
-    ev_timer_set(timeout, global_config->close_timeout, 0);
+    ev_timer_set(timeout, global_config->server_close_timeout, 0);
     ev_timer_start(ev_default_loop(0), timeout);
 }
 

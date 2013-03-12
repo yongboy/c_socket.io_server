@@ -9,6 +9,9 @@
 #define RESPONSE_404 \
     "HTTP/1.1 404 Not Found\r\n"
 
+#define RESPONSE_400 \
+    "HTTP/1.1 400 Bad Request\r\n"
+
 #define RESPONSE_TEMPLATE \
     "HTTP/1.1 200 OK\r\n" \
     "Connection: keep-alive\r\n" \
@@ -28,7 +31,7 @@
 #define FLASH_SECURITY_FILE "<cross-domain-policy><allow-access-from domain='*' to-ports='*' /></cross-domain-policy>"
 
 #define TRANSPORT_WEBSOCKET_VERSION 4
-#define REQUEST_BUFFER_SIZE 2048
+#define REQUEST_BUFFER_SIZE 10240
 
 struct _ext_to_content_type {
     char *extnsn[6];
@@ -74,6 +77,7 @@ typedef struct {
     char    *transports;
     int     heartbeat_timeout;
     int     close_timeout;
+    int     server_close_timeout;
     int     heartbeat_interval;
     int     enable_flash_policy;
     int     flash_policy_port;

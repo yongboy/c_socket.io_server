@@ -7,7 +7,6 @@
 #include "store.h"
 #include "socket_io.h"
 #include "safe_mem.h"
-#include "memwatch/memwatch.h"
 
 static void output_callback(session_t *session);
 static void output_header(client_t *client);

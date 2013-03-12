@@ -4,6 +4,7 @@
 #include "socket_io.h"
 #include "endpoint.h"
 #include "store.h"
+#include "safe_mem.h"
 
 void broadcast_clients(char *except_sessionid, char *message) {
     GList *list = get_store_list();
@@ -19,13 +20,13 @@ void broadcast_clients(char *except_sessionid, char *message) {
             continue;
         }
 
-        insert_msg_into_queue(sessionid, message);
+        send_msg(sessionid, message);
     }
 
     g_list_free(list);
 }
 
-void insert_msg_into_queue(char *sessionid, char *message) {
+void send_msg(char *sessionid, char *message) {
     session_t *session = store_lookup(sessionid);
     if (!session) {
         fprintf(stderr, "The sessionid %s has no value !\n", sessionid);
@@ -63,13 +64,14 @@ void notice_connect(message_fields *msg_fields, char *sessionid, char *post_msg)
     }
     session->state = CONNECTED_STATE;
     session->endpoint = g_strdup(msg_fields->endpoint);
+    /*printf("session->endpoint = %s\n", session->endpoint);*/
 
-    insert_msg_into_queue(sessionid, post_msg);
+    send_msg(sessionid, post_msg);
 }
 
 void notice_disconnect(message_fields *msg_fields, char *sessionid) {
     session_t *session = store_lookup(sessionid);
-    if (!session) {
+    if (session == NULL) {
         fprintf(stderr, "The sessionid %s has no value !\n", sessionid);
         return;
     }
@@ -82,5 +84,5 @@ void notice_disconnect(message_fields *msg_fields, char *sessionid) {
     }
 
     store_remove(sessionid);
-    g_free(session);
+    free(session);
 }

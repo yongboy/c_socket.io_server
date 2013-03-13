@@ -95,7 +95,7 @@ void clear_handshake_cb(EV_P_ struct ev_timer *timer, int revents) {
 
         free(session->sessionid);
         free(session->client);
-        if(session->queue)
+        if (session->queue)
             g_queue_free(session->queue);
         free(session->endpoint);
         free(session);
@@ -235,11 +235,25 @@ int on_url_cb(http_parser *parser, const char *at, size_t length) {
 
         // check if exists hang-up connections
         if (session->client) {
-            fprintf(stderr, "the session's client had exist !\n");
-            free_client(ev_default_loop(0), session->client);
+            fprintf(stderr, "the session's(id = %s) client had exist !\n", trans_info->sessionid);
+            struct ev_loop *loop = ev_default_loop(0);
+            client_t *old_client = session->client;
+            fprintf(stderr, "now stop old_client's ev_read event\n");
+            ev_io_stop(loop, &old_client->ev_read);
+            fprintf(stderr, "now stop old_client'timer event\n");
+            ev_timer *timer = &old_client->timeout;
+            if (timer != NULL && (timer->data != NULL)) {
+                ev_timer_stop(loop, timer);
+            }
+            fprintf(stderr, "now close the old_client's fd \n");
+            close(old_client->fd);
+            fprintf(stderr, "now free old_client\n");
+            free(old_client);
+            /*free_client(ev_default_loop(0), session->old_client);*/
             // is it right to free session->queue ?
-            g_queue_free(session->queue);
-            session->queue = NULL;
+            /*g_queue_free(session->queue);*/
+            /*session->queue = NULL;*/
+            fprintf(stderr, "doen free old_client\n");
         }
 
         // bind the client with session
@@ -267,7 +281,7 @@ int on_body_cb(http_parser *parser, const char *at, size_t length) {
         strcpy(post_msg, target);
         free(result);
     }
-    
+
     //check multiple messages framing, eg: `\ufffd` [message lenth] `\ufffd`
     if (strstr(post_msg, POLLING_FRAMEING_DELIM) == post_msg) {
         char *str = strtok(post_msg, POLLING_FRAMEING_DELIM);

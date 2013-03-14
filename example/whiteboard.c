@@ -49,14 +49,21 @@ static void hashtable_init(void) {
 }
 
 static void hashtable_add(const char *key, void *value) {
-    g_hash_table_insert(hashtable, g_strdup(key), value);
+    if (key) {
+        g_hash_table_insert(hashtable, g_strdup(key), value);
+    }
 }
 
 static gboolean hashtable_remove(const char *key) {
-    return g_hash_table_remove(hashtable, key);
+    if (key)
+        return g_hash_table_remove(hashtable, key);
+
+    return 0;
 }
 
 static void *hashtable_lookup(const char *key) {
+    if (key == NULL)
+        return NULL;
     return g_hash_table_lookup(hashtable, key);
 }
 
@@ -89,6 +96,11 @@ static void send_it(char *session_id, char *messaage) {
     send_msg(session_id, messaage);
 }
 
+static void free_event_msg(event_message *event_msg) {
+    free(event_msg->event_name);
+    free(event_msg->event_args);
+}
+
 static void on_event(const char *sessionid, const message_fields *msg_fields) {
     event_message event_msg;
     if (!message_2_struct(msg_fields->message_data, &event_msg)) {
@@ -97,7 +109,10 @@ static void on_event(const char *sessionid, const message_fields *msg_fields) {
     }
 
     if (!strcmp(event_msg.event_name, "roomNotice")) {
-        char target_room_id[] = "myRoom";
+        /*5::/whiteboard:{"name":"roomNotice","args":[{"room":"myRoom"}]}*/
+        char target_room_id[strlen(event_msg.event_args) - 10];// = event_msg.event_args + 9;
+        strncpy(target_room_id, event_msg.event_args + 9, strlen(event_msg.event_args) - 11);
+
         GPtrArray *list = (GPtrArray *)hashtable_lookup(target_room_id);
         if (list == NULL) {
             list = g_ptr_array_new();
@@ -111,13 +126,19 @@ static void on_event(const char *sessionid, const message_fields *msg_fields) {
 
         hashtable_add(g_strdup(sessionid), g_strdup(target_room_id));
         g_ptr_array_foreach(list, (GFunc)send_it, messages);
+        free_event_msg(&event_msg);
         return;
     }
 
     char messages[strlen(msg_fields->ori_data) + 200];
     sprintf(messages, "5::%s:{\"name\":\"%s\",\"args\":[%s]}", endpoint_name, event_msg.event_name, event_msg.event_args);
+    free_event_msg(&event_msg);
     char *target_room_id = (char *)hashtable_lookup(sessionid);
     GPtrArray *list = (GPtrArray *)hashtable_lookup(target_room_id);
+    if(list == NULL){
+        return;
+    }
+
     int i;
     for (i = 0; i < list->len; i++) {
         char *session_id = g_ptr_array_index(list, i);
@@ -126,6 +147,7 @@ static void on_event(const char *sessionid, const message_fields *msg_fields) {
 
         send_msg(session_id, messages);
     }
+
 }
 
 static void on_disconnect(const char *sessionid, const message_fields *msg_fields) {

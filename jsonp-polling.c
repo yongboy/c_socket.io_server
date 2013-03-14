@@ -44,7 +44,7 @@ static void output_whole(client_t *client, char *output_msg) {
 static void output_body(client_t *client, char *http_msg) {
     transport_info *trans_info = &client->trans_info;
     char *sessionid = trans_info->sessionid;
-    int body_len = (int)strlen(http_msg) + (trans_info->i) + 13;
+    int body_len = (int)strlen(http_msg) + (int)atol(trans_info->i) + 13;
     char body_msg[body_len];
     sprintf(body_msg, "io.j[%s]('%s');", trans_info->i, http_msg);
 

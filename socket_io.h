@@ -31,7 +31,7 @@
 #define FLASH_SECURITY_FILE "<cross-domain-policy><allow-access-from domain='*' to-ports='*' /></cross-domain-policy>"
 
 #define TRANSPORT_WEBSOCKET_VERSION 4
-#define REQUEST_BUFFER_SIZE 10240
+#define REQUEST_BUFFER_SIZE 8192
 
 struct _ext_to_content_type {
     char *extnsn[6];

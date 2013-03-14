@@ -31,21 +31,58 @@ int setnonblock(int fd) {
 
 static void read_cb(struct ev_loop *loop, ev_io *w, int revents) {
     client_t *client = w->data;
-
-    int len = 0;
-    char rbuff[REQUEST_BUFFER_SIZE];
-    memset(rbuff, '\0', REQUEST_BUFFER_SIZE);
-    if (revents & EV_READ) {
-        len = read(client->fd, &rbuff, REQUEST_BUFFER_SIZE);
-    } else {
-        fprintf(stdout, "revents & EV_READ is false !\n");
-    }
-
     if (EV_ERROR & revents) {
         printf("error event in read\n");
         free_res(loop, w);
         return ;
     }
+
+    if (!(revents & EV_READ)) {
+        fprintf(stdout, "revents & EV_READ is false !\n");
+        free_res(loop, w);
+        return;
+    }
+
+    /*int len = 0;
+    char rbuff[REQUEST_BUFFER_SIZE];
+    memset(rbuff, '\0', REQUEST_BUFFER_SIZE);
+    len = read(client->fd, &rbuff, REQUEST_BUFFER_SIZE);*/
+
+    char read_buff[REQUEST_BUFFER_SIZE + 1];
+    int sum = 0, len = 0;
+    char *request_data = NULL;
+
+
+    while ((len = read(client->fd, &read_buff, REQUEST_BUFFER_SIZE)) > 0) {
+        /*len = read(client->fd, &read_buff, REQUEST_BUFFER_SIZE);*/
+        sum += len;
+        if (len < REQUEST_BUFFER_SIZE)
+            read_buff[len] = '\0';
+        if (request_data == NULL) {
+            request_data = malloc(len + 1);
+            memcpy(request_data, read_buff, len);
+        } else {
+            request_data = realloc(request_data, sum + 1);
+            memcpy(request_data + sum - len, read_buff, len);
+        }
+    }
+    len = sum;
+    char *rbuff = request_data;
+
+    /*    do {
+            len = read(client->fd, &rbuff, REQUEST_BUFFER_SIZE);
+            sum += len;
+            if (len < REQUEST_BUFFER_SIZE)
+                rbuff[len] = '\0';
+            if (request_data == NULL) {
+                request_data = malloc(len+1);
+                memcpy(request_data, rbuff, len);
+            } else {
+                printf("request_data is not null!\n");
+                request_data = realloc(request_data, sum + 1);
+                memcpy(request_data + sum - len, rbuff, len);
+            }
+        } while (len == REQUEST_BUFFER_SIZE);  */
 
     if (len < 0) {
         printf("read error\n");
@@ -55,7 +92,7 @@ static void read_cb(struct ev_loop *loop, ev_io *w, int revents) {
     }
 
     if (len == 0) {
-        printf("client disconnected with read buff len = 0.\n");
+        /*printf("client disconnected with read buff len = 0.\n");*/
         handle_disconnected(client);
         free_res(loop, w);
         return;
@@ -109,6 +146,8 @@ static void read_cb(struct ev_loop *loop, ev_io *w, int revents) {
             free_res(loop, w);
         }
     }
+
+    free(rbuff);
 }
 
 static void accept_cb(struct ev_loop *loop, ev_io *w, int revents) {
@@ -208,9 +247,11 @@ void free_client(struct ev_loop *loop, client_t *client) {
         }
     }
 
+    client->data = NULL;
+
     close(client->fd);
 
-    if(client)
+    if (client)
         free(client);
 }
 
@@ -230,8 +271,9 @@ void write_output(client_t *client, char *msg, void (*fn)(client_t *client)) {
         return;
     }
 
-    write(client->fd, msg, strlen(msg));
-
+    if (msg) {
+        write(client->fd, msg, strlen(msg));
+    }
     if (fn) {
         fn(client);
     }

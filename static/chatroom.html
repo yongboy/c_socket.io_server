@@ -4,13 +4,14 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Chat Demo</title>
 <link href="css/chat.css" rel="stylesheet">
-<!-- <script src="js/jquery-1.6.2.js"></script> -->
-<script src="http://192.168.190.150/js/jquery-1.6.2.js"></script>
-<script src="http://192.168.190.150/socket.io/socket.io.js"></script>
-<!--script src="http://192.168.190.150/js/socket.io.js"></script-->
+<script src="js/jquery-1.8.3.min.js"></script>
+<script src="socket.io/socket.io.js"></script>
+<!-- <link href="http://192.168.190.150/css/chat.css" rel="stylesheet"> -->
+<!-- <script src="http://192.168.190.150/js/jquery-1.6.2.js"></script> -->
+<!-- <script src="http://192.168.190.150/js/socket.io.js"></script> -->
 <script>
 	// socket.io specific code
-	var socket = io.connect("/chat");
+	var socket = io.connect("/chatroom");
 
 	socket.on('connect', function() {
 		$('#chat').addClass('connected');

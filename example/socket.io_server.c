@@ -3,7 +3,7 @@
 int main(int argc, char const *argv[]) {
     server_init();
 
-    server_register_endpoint(init_chat_endpoint_implement("/chat"));
+    server_register_endpoint(init_chat_endpoint_implement("/chatroom"));
     server_register_endpoint(init_whiteboard_endpoint_implement("/whiteboard"));
     
     int port = 8000;

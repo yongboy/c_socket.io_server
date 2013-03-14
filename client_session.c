@@ -11,7 +11,7 @@ void broadcast_clients(char *except_sessionid, char *message) {
     GList *it = NULL;
     for (it = list; it; it = it->next) {
         char *sessionid = it->data;
-        if (strlen(sessionid) == 0) {
+        if (sessionid == NULL) {
             fprintf(stderr, "the sessioin is NULL ****************\n");
             continue;
         }

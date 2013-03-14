@@ -6,6 +6,16 @@ Tasks:
           ☐ handle the disconnect parameter within url
           ☐ how to receive exception siginal ...
           ✔ chat demo handle connect/disconnect with null username @done (13-03-06 15:09)
+          ✔ when no endpoints @done (13-03-12 16:24)
+              output 500
+          ✔ Fix the bug in browser: @done (13-03-12 09:11)
+              POST /socket.io/1/xhr-polling/ffc7372c-8a2f-11e2-a8b4-000c29957841?t=1362994953548 HTTP/1.1
+              1::/whiteboard
+              ...
+              ...
+              POST /socket.io/1/xhr-polling/ffc7372c-8a2f-11e2-a8b4-000c29957841?t=1362994960984 HTTP/1.1
+              1::/chat
+            ✔ /wihteboard get roomid from json ... @done (13-03-12 16:24)
      
        Static File:
            ✔ serve big satic file @done (13-03-05 09:21)

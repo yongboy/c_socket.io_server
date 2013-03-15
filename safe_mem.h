@@ -6,7 +6,7 @@
 
 static void *debug_malloc(size_t size, const char *file, int line, const char *func) {
     void *p;
-    p = malloc(size);
+    p = g_malloc(size);
     // printf("%s:%d:%s:malloc(%ld): p=0x%lx\n",
     //        file, line, func, size, (unsigned long)p);
     if(p == NULL){
@@ -21,7 +21,7 @@ static void *debug_malloc(size_t size, const char *file, int line, const char *f
         /*printf("%s:%d:%s:free(0x%lx)\n", __FILE__, __LINE__,          \
                __func__, (unsigned long)p);*/                            \
         if(p){                                                          \
-            free(p);                                                     \
+            g_free(p);                                                     \
             p = NULL;                                                     \
         }                                                                  \
     } while (0)

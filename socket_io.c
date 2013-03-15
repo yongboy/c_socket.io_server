@@ -12,6 +12,7 @@
 
 http_parser_settings settings;
 ev_io ev_accept;
+ev_signal signal_watcher;
 
 static void free_res(struct ev_loop *loop, ev_io *ws);
 void free_client(struct ev_loop *loop, client_t *client); typedef int MyCustomType;
@@ -43,18 +44,16 @@ static void read_cb(struct ev_loop *loop, ev_io *w, int revents) {
         return;
     }
 
-    /*int len = 0;
+    int len = 0;
     char rbuff[REQUEST_BUFFER_SIZE];
     memset(rbuff, '\0', REQUEST_BUFFER_SIZE);
-    len = read(client->fd, &rbuff, REQUEST_BUFFER_SIZE);*/
+    len = read(client->fd, &rbuff, REQUEST_BUFFER_SIZE);
 
-    char read_buff[REQUEST_BUFFER_SIZE + 1];
+    /*char read_buff[REQUEST_BUFFER_SIZE + 1];
     int sum = 0, len = 0;
     char *request_data = NULL;
 
-
     while ((len = read(client->fd, &read_buff, REQUEST_BUFFER_SIZE)) > 0) {
-        /*len = read(client->fd, &read_buff, REQUEST_BUFFER_SIZE);*/
         sum += len;
         if (len < REQUEST_BUFFER_SIZE)
             read_buff[len] = '\0';
@@ -67,7 +66,7 @@ static void read_cb(struct ev_loop *loop, ev_io *w, int revents) {
         }
     }
     len = sum;
-    char *rbuff = request_data;
+    char *rbuff = request_data;*/
 
     /*    do {
             len = read(client->fd, &rbuff, REQUEST_BUFFER_SIZE);
@@ -115,10 +114,7 @@ static void read_cb(struct ev_loop *loop, ev_io *w, int revents) {
                 int result = WEBSOCKET_get_content(rbuff, len, dst, REQUEST_BUFFER_SIZE);
 
                 if (result == -2) {
-                    printf("websocket client close the connection now ...\n");
-                    // handle disconnecting event ...
                     handle_disconnected(client);
-                    fprintf(stderr, "now close the connection .............\n");
                     free_res(loop, w);
                 } else {
                     handle_body_cb(client, dst, NULL);
@@ -147,7 +143,7 @@ static void read_cb(struct ev_loop *loop, ev_io *w, int revents) {
         }
     }
 
-    free(rbuff);
+    /*free(rbuff);*/
 }
 
 static void accept_cb(struct ev_loop *loop, ev_io *w, int revents) {
@@ -195,6 +191,46 @@ void server_register_endpoint(endpoint_implement *endpoint_impl) {
     endpoint_impl->on_init(endpoint_impl->endpoint);
 }
 
+static void dump_sig(int signo) {
+    void *array[30];
+    size_t size;
+    char **strings;
+    size_t i;
+
+    size = backtrace (array, 30);
+    strings = backtrace_symbols (array, size);
+
+    fprintf (stderr, "Obtained %zd stack frames ...\n", size);
+
+    for (i = 0; i <= size; i++)
+        fprintf (stderr, "%s\n", strings[i]);
+
+    free (strings);
+}
+
+static void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents) {
+    int signum = w->signum;
+    const gchar *sigstr = g_strsignal(signum);
+    g_printerr("receive sigal(%d) : %s\ndump signal now\n", signum, sigstr);
+    dump_sig(signum);
+    switch (signum) {
+    case SIGINT:
+        ev_break (loop, EVBREAK_ALL);
+        break;
+    case SIGABRT:
+        ev_break (loop, EVBREAK_ALL);
+        break;
+    case SIGSEGV:
+        // TO DO NOTHING ...
+        break;
+    case SIGPIPE:
+        // TO DO NOTHING ...
+        break;
+    default:
+        break;
+    }
+}
+
 void server_run(int port) {
     struct sockaddr_in listen_addr;
     int reuseaddr_on = 1;
@@ -217,6 +253,13 @@ void server_run(int port) {
         err(1, "failed to set server socket to non-blocking");
 
     struct ev_loop *loop = ev_default_loop(0);
+
+    ev_signal_init(&signal_watcher, sigint_cb, SIGPIPE);
+    ev_signal_init(&signal_watcher, sigint_cb, SIGINT);
+    ev_signal_init(&signal_watcher, sigint_cb, SIGABRT);
+    ev_signal_init(&signal_watcher, sigint_cb, SIGSEGV);
+    ev_signal_start(loop, &signal_watcher);
+    
     ev_io_init(&ev_accept, accept_cb, listen_fd, EV_READ);
     ev_io_start(loop, &ev_accept);
 
@@ -228,7 +271,6 @@ void free_client(struct ev_loop *loop, client_t *client) {
         printf("free_res the clientent is NULL !!!!!!\n");
         return;
     }
-
     ev_io_stop(loop, &client->ev_read);
 
     ev_timer *timer = &client->timeout;

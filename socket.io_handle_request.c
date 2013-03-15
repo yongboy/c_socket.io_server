@@ -43,6 +43,11 @@ void clear_handshake_cb(EV_P_ struct ev_timer *timer, int revents) {
             } else {
                 fprintf(stderr, "the endpoint_impl is null !\n");
             }
+
+            if (session->endpoint) {
+                free(session->endpoint);
+                session->endpoint = NULL;
+            }
         } else {
             fprintf(stderr, "session's (null)endpoint is %s and sessionid is %s\n", session->endpoint, session->sessionid);
         }
@@ -58,10 +63,6 @@ void clear_handshake_cb(EV_P_ struct ev_timer *timer, int revents) {
     if (session->queue) {
         g_queue_free(session->queue);
         session->queue = NULL;
-    }
-    if (session->endpoint) {
-        free(session->endpoint);
-        session->endpoint = NULL;
     }
     free(session);
 }
@@ -162,7 +163,6 @@ int handle_transport(client_t *client, const char *urlStr) {
         ev_timer_start(ev_default_loop(0), &client->timeout);
         return 0;
     }
-
     trans_fn->output_whole(client, body_msg);
 
     return 0;
@@ -214,6 +214,11 @@ int on_url_cb(http_parser *parser, const char *at, size_t length) {
             /*free(old_client);*/
             /*free_client(ev_default_loop(0), session->old_client);*/
             // is it right to free session->queue ?
+
+            //reset the session's timeout value
+            ev_timer *close_timeout = &session->close_timeout;
+            /*ev_timer_set(close_timeout, global_config->server_close_timeout * 2, 0);*/
+            ev_timer_stop(ev_default_loop(0), close_timeout);
             if (session->queue) {
                 // TODO: bugs need to fix
                 // in sometimes, g_queue_free may cause g_queue_pop_tail () invald
@@ -224,7 +229,6 @@ int on_url_cb(http_parser *parser, const char *at, size_t length) {
 
         // bind the client with session
         session->client = client;
-
         return handle_transport(client, urlStr);
     } else {
         return handle_static(parser, urlStr);

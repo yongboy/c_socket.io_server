@@ -12,8 +12,6 @@ int handle_body_cb_one(client_t *client, char *post_msg, void (*close_fn)(client
 
 int on_body_cb(http_parser *parser, const char *at, size_t length) {
     client_t *client = parser->data;
-    /*printf("at is %s\n", at);
-    printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");*/
     char post_msg[(int)length + 1];
     sprintf(post_msg, "%.*s", (int)length, at);
     if (post_msg[0] == 'd') {
@@ -41,25 +39,18 @@ int on_body_cb(http_parser *parser, const char *at, size_t length) {
     }
 
     //check multiple messages framing, eg: `\ufffd` [message lenth] `\ufffd`
-    /*if (strstr(post_msg, POLLING_FRAMEING_DELIM) == post_msg) {*/
     if (g_str_has_prefix(post_msg, POLLING_FRAMEING_DELIM)) {
         char *str = strtok(post_msg, POLLING_FRAMEING_DELIM);
         bool is_str = false;
         while (str != NULL) {
             if (is_str) {
-                //TODO sometimes the str is half package ...
-                if(str == NULL){
-                    fprintf(stderr, "the str is NULL with ori post data %s\n", client->data);
-                    continue;
-                }
-                if(g_str_has_suffix (str, "]}")){
+                if (g_str_has_suffix (str, "]}")) {
                     handle_body_cb_one(client, str, NULL, false);
-                }else{
-                    printf("half package str is %s\n", str);                    
+                } else {
+                    printf("half package str is %s\n", str);
                     transport_info *trans_info = &client->trans_info;
                     fprintf(stderr, "the str is half package with ori url is %s & data %s\n", trans_info->oriurl, client->data);
                 }
-
             }
             is_str = !is_str;
             str = strtok(NULL, POLLING_FRAMEING_DELIM);
@@ -91,18 +82,6 @@ int handle_body_cb_one(client_t *client, char *post_msg, void (*close_fn)(client
         /*return 0;*/
     }
 
-    endpoint_implement *endpoint_impl = endpoints_get(msg_fields.endpoint);
-    if (endpoint_impl == NULL) {
-        if (client->data) {
-            /*fprintf(stderr, "client->date srlen is %d\n", (int)strlen(client->data));*/
-        }
-        if (need_close_fn) {
-            fprintf(stderr, "handle_body_cb_one's endpoint_impl is NULL and the post_msg is %s !\n", post_msg);
-            write_output(client, RESPONSE_400, on_close);
-        }
-        return 0;
-    }
-
     transports_fn *trans_fn = get_transport_fn(client);
     if (trans_fn == NULL) {
         if (need_close_fn) {
@@ -114,8 +93,27 @@ int handle_body_cb_one(client_t *client, char *post_msg, void (*close_fn)(client
 
     char *sessionid = trans_info->sessionid;
     session_t *session = store_lookup(sessionid);
+    if (session == NULL) {
+        fprintf(stderr, "handle_body_cb_one's session is NULL and the post_msg is %s !\n", post_msg);
+        write_output(client, RESPONSE_400, on_close);
+
+        return 0;
+    }
 
     int num = atoi(msg_fields.message_type);
+
+    endpoint_implement *endpoint_impl = endpoints_get(msg_fields.endpoint);
+    if (endpoint_impl == NULL && num != 2) { // just for debug invalid request ...
+        if (client->data) {
+            fprintf(stderr, "client->date srlen is %d\n", (int)strlen(client->data));
+        }
+        if (need_close_fn) {
+            fprintf(stderr, "handle_body_cb_one's endpoint_impl is NULL and the post_msg is %s !\n", post_msg);
+            write_output(client, RESPONSE_400, on_close);
+        }
+        return 0;
+    }
+
     switch (num) {
     case 0:
         endpoint_impl->on_disconnect(trans_info->sessionid, &msg_fields);

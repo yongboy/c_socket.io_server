@@ -22,4 +22,18 @@ typedef struct {
     void (*on_destroy)(const char *endpoint);
 } endpoint_implement;
 
+/**
+ * [send_msg description]
+ * @param sessionid [description]
+ * @param message   [description]
+ */
+void send_msg(char *sessionid, char *message);
+
+/**
+ * [broadcast_clients description]
+ * @param except_sessionid [description]
+ * @param message          [description]
+ */
+void broadcast_clients(char *except_sessionid, char *message);
+
 #endif

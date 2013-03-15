@@ -48,23 +48,22 @@ void clear_handshake_cb(EV_P_ struct ev_timer *timer, int revents) {
         }
     }
 
-    if (timer) {
-        free(timer->data);
-        ev_timer_stop(ev_default_loop(0), timer);
+    free(timer->data);
+    ev_timer_stop(ev_default_loop(0), timer);
 
-        store_remove(sessionid);
+    store_remove(sessionid);
 
-        free(session->sessionid);
-        free(session->client);
-        if (session->queue){
-            g_queue_free(session->queue);
-            session->queue = NULL;
-        }
-        free(session->endpoint);
-        free(session);
-    } else {
-        printf("time is NULL !\n");
+    free(session->sessionid);
+    free(session->client);
+    if (session->queue) {
+        g_queue_free(session->queue);
+        session->queue = NULL;
     }
+    if (session->endpoint) {
+        free(session->endpoint);
+        session->endpoint = NULL;
+    }
+    free(session);
 }
 
 int handle_handshake(http_parser *parser) {

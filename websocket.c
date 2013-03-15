@@ -8,7 +8,6 @@
 extern config *global_config;
 
 static void write_ws_msg(client_t *client, const char *ori_msg) {
-    printf("websocket write ori msg is %s\n", ori_msg);
     int ori_len = (int)strlen(ori_msg);
     int target_len = (int)ori_len + 9;
     unsigned char target_msg[target_len];

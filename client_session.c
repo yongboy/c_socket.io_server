@@ -28,7 +28,7 @@ void broadcast_clients(char *except_sessionid, char *message) {
 
 void send_msg(char *sessionid, char *message) {
     session_t *session = store_lookup(sessionid);
-    if (!session) {
+    if (session == NULL) {
         fprintf(stderr, "The sessionid %s has no value !\n", sessionid);
         return;
     }

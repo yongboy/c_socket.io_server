@@ -70,6 +70,24 @@ static void session_nickname_destroy(void) {
     g_hash_table_destroy(session_nickname_hash);
 }
 
+static void broadcast_room(gpointer except_sessionid, gpointer msg) {
+    GList *list = g_hash_table_get_keys(session_nickname_hash);
+    GList *it = NULL;
+    for (it = list; it; it = it->next) {
+        gpointer session_id = it->data;
+        if (session_id == NULL)
+            continue;
+
+        if (except_sessionid != NULL && strcmp(except_sessionid, session_id) == 0) {
+            continue;
+        }
+
+        send_msg(session_id, msg);
+    }
+
+    g_list_free(list);
+}
+
 /**
 ** use the struct to warpper the demo implment
 **/
@@ -100,7 +118,7 @@ static void on_event(const char *sessionid, const message_fields *msg_fields) {
     if (!strcmp(event_msg.event_name, "nickname")) {
         char connect_msg[MAX_BUFF_SIZE] = "";
         sprintf(connect_msg, "%s::%s:{\"name\":\"announcement\",\"args\":[\"%s connected\"]}", msg_fields->message_type, msg_fields->endpoint, event_msg.event_args);
-        broadcast_clients(NULL, connect_msg);
+        broadcast_room(NULL, connect_msg);
 
         // add nickname into queue
         session_nickname_add(sessionid, event_msg.event_args);
@@ -128,12 +146,12 @@ static void on_event(const char *sessionid, const message_fields *msg_fields) {
 
         char nicknames_msg[MAX_BUFF_SIZE] = "";
         sprintf(nicknames_msg, "%s::%s:{\"name\":\"nicknames\",\"args\":[{%s}]}", msg_fields->message_type, msg_fields->endpoint, nicknames_list);
-        broadcast_clients(NULL, nicknames_msg);
+        broadcast_room(NULL, nicknames_msg);
     } else if (!strcmp(event_msg.event_name, "user message") || !strcmp(event_msg.event_name, "user+message")) {
         char user_msg[MAX_BUFF_SIZE] = "";
         char *nickname_str = session_nickname_lookup(sessionid);
         sprintf(user_msg, "%s::%s:{\"name\":\"user message\",\"args\":[\"%s\",\"%s\"]}", msg_fields->message_type, msg_fields->endpoint, nickname_str, event_msg.event_args);
-        broadcast_clients(sessionid, user_msg);
+        broadcast_room(sessionid, user_msg);
     } else {
         fprintf(stderr, "invalid ori_data is %s\n", msg_fields->ori_data);
     }
@@ -143,13 +161,13 @@ static void on_disconnect(const char *sessionid, const message_fields *msg_field
     printf("%s has been disconnect now\n", sessionid);
 
     char *dis_username = session_nickname_lookup(sessionid);
-    if(!dis_username){
+    if (!dis_username) {
         return;
     }
 
     char connect_msg[MAX_BUFF_SIZE] = "";
     sprintf(connect_msg, "%s::%s:{\"name\":\"announcement\",\"args\":[\"%s diconnected\"]}", "5", endpoint_name, dis_username);
-    broadcast_clients(NULL, connect_msg);
+    broadcast_room(NULL, connect_msg);
 
     // add nickname into queue
     session_nickname_remove(sessionid);
@@ -177,7 +195,7 @@ static void on_disconnect(const char *sessionid, const message_fields *msg_field
 
     char nicknames_msg[MAX_BUFF_SIZE] = "";
     sprintf(nicknames_msg, "%s::%s:{\"name\":\"nicknames\",\"args\":[{%s}]}", "5", endpoint_name, nicknames_list);
-    broadcast_clients(NULL, nicknames_msg);
+    broadcast_room(NULL, nicknames_msg);
 }
 
 static void on_destroy(const char *endpoint) {

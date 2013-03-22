@@ -14,7 +14,7 @@ static void endpoints_value_destroyed(gpointer data) {
 }
 
 static void endpoints_key_destroyed(gpointer data) {
-    g_printf("endpoint was destroyed with key %s\n", (char *)data);
+    /*g_printf("endpoint was destroyed with key %s\n", (char *)data);*/
 }
 
 void endpoints_init(void) {

@@ -16,12 +16,12 @@ extern config *global_config;
 
 void clear_handshake_cb(EV_P_ struct ev_timer *timer, int revents) {
     if (EV_ERROR & revents) {
-        printf("error event in timer_beat\n");
+        log_warn("error event in timer_beat");
         return ;
     }
 
     if (timer == NULL) {
-        fprintf(stderr, "the timer is NULL now !\n");
+        log_warn("the timer is NULL now !");
         return;
     }
 
@@ -35,13 +35,12 @@ void clear_handshake_cb(EV_P_ struct ev_timer *timer, int revents) {
         session->state = DISCONNECTING_STATE;
         // something need to handle on_disconnected event ...
         if (session->endpoint) {
-            /*fprintf(stderr, "session's endpoint is %s and sessionid is %s\n", session->endpoint, session->sessionid);*/
+            /*log_warn("session's endpoint is %s and sessionid is %s\n", session->endpoint, session->sessionid);*/
             endpoint_implement *endpoint_impl = endpoints_get(session->endpoint);
             if (endpoint_impl) {
-                /*printf("call endpoint_impl->on_disconnect here ...\n");*/
                 endpoint_impl->on_disconnect(sessionid, NULL);
             } else {
-                fprintf(stderr, "the endpoint_impl is null !\n");
+                log_warn("the endpoint_impl is null !");
             }
 
             if (session->endpoint) {
@@ -49,7 +48,7 @@ void clear_handshake_cb(EV_P_ struct ev_timer *timer, int revents) {
                 session->endpoint = NULL;
             }
         } else {
-            fprintf(stderr, "session's (null)endpoint is %s and sessionid is %s\n", session->endpoint, session->sessionid);
+            log_warn("session's (null)endpoint is %s and sessionid is %s", session->endpoint, session->sessionid);
         }
     }
 
@@ -98,17 +97,17 @@ int handle_handshake(http_parser *parser) {
 
 void timeout_cb(EV_P_ struct ev_timer *timer, int revents) {
     if (EV_ERROR & revents) {
-        printf("error event in timer_beat\n");
+        log_warn("error event in timer_beat");
         return ;
     }
 
     if (timer == NULL) {
-        printf("the timer is NULL now !\n");
+        log_warn("the timer is NULL now !");
     }
 
     client_t *client = timer->data;
     if (client == NULL) {
-        printf("Timeout the client is NULL !\n");
+        log_warn("Timeout the client is NULL !");
         return;
     }
 
@@ -117,7 +116,7 @@ void timeout_cb(EV_P_ struct ev_timer *timer, int revents) {
         trans_fn->output_body(client, trans_fn->heartbeat);
         trans_fn->timeout_callback(timer);
     } else {
-        fprintf(stderr, "Got NO transport struct !\n");
+        log_warn("Got NO transport struct !\n");
     }
 }
 
@@ -127,7 +126,7 @@ int handle_transport(client_t *client, const char *urlStr) {
 
     transport_info *trans_info = &client->trans_info;
     if (trans_info == NULL) {
-        fprintf(stderr, "GOT NULLL MATCH!");
+        log_warn("GOT NULLL MATCH!");
         write_output(client, RESPONSE_400, on_close);
 
         return 0;
@@ -135,7 +134,7 @@ int handle_transport(client_t *client, const char *urlStr) {
 
     transports_fn *trans_fn = get_transport_fn(client);
     if (!trans_fn) {
-        fprintf(stderr, "Got no transport struct !\n");
+        log_warn("Got no transport struct !");
         write_output(client, RESPONSE_400, on_close);
 
         return 0;
@@ -150,6 +149,7 @@ int handle_transport(client_t *client, const char *urlStr) {
         char *str = g_queue_pop_tail(queue);
         if (str != NULL) {
             strcpy(body_msg, str);
+            free(str);
         }
     }
 
@@ -198,31 +198,20 @@ int on_url_cb(http_parser *parser, const char *at, size_t length) {
 
         // check if exists hang-up connections
         if (session->client) {
-            fprintf(stderr, "the session's(id = %s) client had exist !\n", trans_info->sessionid);
-            /*struct ev_loop *loop = ev_default_loop(0);*/
-            /*client_t *old_client = session->client;*/
-            /*fprintf(stderr, "now jump old_client's ev_read event\n");*/
-            /*ev_io_stop(loop, &old_client->ev_read);*/
-            /*fprintf(stderr, "now stop old_client'timer event\n");*/
-            /*ev_timer *timer = &old_client->timeout;
-            if (timer != NULL && (timer->data != NULL)) {
-                ev_timer_stop(loop, timer);
-            }*/
-            /*fprintf(stderr, "now close the old_client's fd \n");*/
-            /*close(old_client->fd);*/
-            /*fprintf(stderr, "now free old_client\n");*/
-            /*free(old_client);*/
-            /*free_client(ev_default_loop(0), session->old_client);*/
-            // is it right to free session->queue ?
-
-            //reset the session's timeout value
+            log_warn("the session's(id = %s) client had exist !", trans_info->sessionid);
+            /*client_t *old_client = session->client;
+            close(old_client->fd);
+            free(old_client);*/
             ev_timer *close_timeout = &session->close_timeout;
-            /*ev_timer_set(close_timeout, global_config->server_close_timeout * 2, 0);*/
-            ev_timer_stop(ev_default_loop(0), close_timeout);
+            if (close_timeout) {
+                ev_timer_stop(ev_default_loop(0), close_timeout);
+            }
+
             if (session->queue) {
-                // TODO: bugs need to fix
+                // TODO: bugs need to fix within IE6 browser
                 // in sometimes, g_queue_free may cause g_queue_pop_tail () invald
                 /*g_queue_free(session->queue);*/
+                /*g_queue_clear(session->queue);*/
                 session->queue = NULL;
             }
         }

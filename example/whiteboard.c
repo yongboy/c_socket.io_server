@@ -81,7 +81,7 @@ static void hashtable_destroy(void) {
 static char *endpoint_name;
 static void on_init(const char *endpoint) {
     hashtable_init();
-    printf("%s has been inited now\n", endpoint);
+    log_debug("%s has been inited now", endpoint);
     endpoint_name = g_strdup(endpoint);
 }
 
@@ -104,7 +104,7 @@ static void free_event_msg(event_message *event_msg) {
 static void on_event(const char *sessionid, const message_fields *msg_fields) {
     event_message event_msg;
     if (!message_2_struct(msg_fields->message_data, &event_msg)) {
-        fprintf(stderr, "%s Parse Message Error !\n", msg_fields->ori_data);
+        log_error("%s Parse Message Error !", msg_fields->ori_data);
         return;
     }
 
@@ -153,7 +153,7 @@ static void on_event(const char *sessionid, const message_fields *msg_fields) {
 static void on_disconnect(const char *sessionid, const message_fields *msg_fields) {
     char *room_id = (char *)hashtable_lookup(sessionid);
     if (room_id == NULL) {
-        fprintf(stderr, "the room_id is NULL\n");
+        log_error("the room_id is NULL\n");
         return;
     }
 
@@ -177,7 +177,7 @@ static void on_disconnect(const char *sessionid, const message_fields *msg_field
 }
 
 static void on_destroy(const char *endpoint) {
-    printf("%s has been destroy now\n", endpoint);
+    log_info("%s has been destroy now", endpoint);
     hashtable_destroy();
     free(endpoint_name);
 }

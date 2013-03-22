@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -47,7 +48,7 @@ transport_info *url_2_struct(gchar *input_string, transport_info *trans_info) {
             trans_info->i = new_val;
         }
     } else {
-        printf("trans_info is NULL!!!!!!!!!\n");
+        log_error("trans_info is NULL!!!!!!!!!");
         trans_info = NULL;
     }
 

@@ -17,7 +17,7 @@ int on_body_cb(http_parser *parser, const char *at, size_t length) {
     if (post_msg[0] == 'd') {
         char *unescape_string = g_uri_unescape_string(post_msg, NULL);
         if (unescape_string == NULL) {
-            fprintf(stderr, "unescape_string is NULL! post_msg is %s\n", post_msg);
+            log_warn("unescape_string is NULL! post_msg is %s", post_msg);
 
             char http_msg[200];
             sprintf(http_msg, RESPONSE_PLAIN, 1, "1");
@@ -47,9 +47,9 @@ int on_body_cb(http_parser *parser, const char *at, size_t length) {
                 if (g_str_has_suffix (str, "]}")) {
                     handle_body_cb_one(client, str, NULL, false);
                 } else {
-                    printf("half package str is %s\n", str);
+                    log_warn("half package str is %s", str);
                     transport_info *trans_info = &client->trans_info;
-                    fprintf(stderr, "the str is half package with ori url is %s & data %s\n", trans_info->oriurl, client->data);
+                    log_warn("the str is half package with ori url is %s & data %s", trans_info->oriurl, client->data);
                 }
             }
             is_str = !is_str;
@@ -69,7 +69,7 @@ int on_body_cb(http_parser *parser, const char *at, size_t length) {
 int handle_body_cb_one(client_t *client, char *post_msg, void (*close_fn)(client_t *client), bool need_close_fn) {
     transport_info *trans_info = &client->trans_info;
     if (trans_info == NULL) {
-        fprintf(stderr, "handle_body_cb_one's trans_info is NULL!\n");
+        log_warn("handle_body_cb_one's trans_info is NULL!");
         write_output(client, RESPONSE_400, on_close);
 
         return 0;
@@ -78,14 +78,14 @@ int handle_body_cb_one(client_t *client, char *post_msg, void (*close_fn)(client
     message_fields msg_fields;
     body_2_struct(post_msg, &msg_fields);
     if (msg_fields.endpoint == NULL) {
-        fprintf(stderr, "msg_fields.endpoint is NULL and the post_msg is %s\n", post_msg);
+        log_warn("msg_fields.endpoint is NULL and the post_msg is %s", post_msg);
         /*return 0;*/
     }
 
     transports_fn *trans_fn = get_transport_fn(client);
     if (trans_fn == NULL) {
         if (need_close_fn) {
-            fprintf(stderr, "handle_body_cb_one's trans_fn is NULL and the post_msg is %s !\n", post_msg);
+            log_warn("handle_body_cb_one's trans_fn is NULL and the post_msg is %s !", post_msg);
             write_output(client, RESPONSE_400, on_close);
         }
         return 0;
@@ -94,7 +94,7 @@ int handle_body_cb_one(client_t *client, char *post_msg, void (*close_fn)(client
     char *sessionid = trans_info->sessionid;
     session_t *session = store_lookup(sessionid);
     if (session == NULL) {
-        fprintf(stderr, "handle_body_cb_one's session is NULL and the post_msg is %s !\n", post_msg);
+        log_warn("handle_body_cb_one's session is NULL and the post_msg is %s !", post_msg);
         write_output(client, RESPONSE_400, on_close);
 
         return 0;
@@ -105,10 +105,10 @@ int handle_body_cb_one(client_t *client, char *post_msg, void (*close_fn)(client
     endpoint_implement *endpoint_impl = endpoints_get(msg_fields.endpoint);
     if (endpoint_impl == NULL && num != 2) { // just for debug invalid request ...
         if (client->data) {
-            fprintf(stderr, "client->date srlen is %d\n", (int)strlen(client->data));
+            log_warn("client->date srlen is %d", (int)strlen(client->data));
         }
         if (need_close_fn) {
-            fprintf(stderr, "handle_body_cb_one's endpoint_impl is NULL and the post_msg is %s !\n", post_msg);
+            log_warn("handle_body_cb_one's endpoint_impl is NULL and the post_msg is %s !", post_msg);
             write_output(client, RESPONSE_400, on_close);
         }
         return 0;
@@ -125,7 +125,7 @@ int handle_body_cb_one(client_t *client, char *post_msg, void (*close_fn)(client
             notice_connect(&msg_fields, trans_info->sessionid, post_msg);
             endpoint_impl->on_connect(trans_info->sessionid);
         } else {
-            fprintf(stderr, "invalid state is %d endpoint is %s, sessionid is %s, post_msg is %s\n", session->state, msg_fields.endpoint, trans_info->sessionid, post_msg);
+            log_warn("invalid state is %d endpoint is %s, sessionid is %s, post_msg is %s", session->state, msg_fields.endpoint, trans_info->sessionid, post_msg);
         }
         break;
     case 2:

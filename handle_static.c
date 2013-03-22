@@ -64,7 +64,7 @@ char *read_file(const char *filepath, int *filelength) {
         filedate = malloc(*filelength);
         read(file, filedate, *filelength);
     } else {
-        fprintf(stderr, "the file %s is NULL \n", filepath);
+        log_warn("the file %s is NULL ", filepath);
         *filelength = 0;
         filedate = NULL;
     }
@@ -77,7 +77,7 @@ int handle_static(http_parser *parser, const char *urlStr) {
     client_t *client = parser->data;
 
     if (client == NULL) {
-        printf("the client is NULL !\n");
+        log_warn("the client is NULL !");
         return -1;
     }
 
@@ -91,7 +91,7 @@ int handle_static(http_parser *parser, const char *urlStr) {
     int file = open(file_path, O_RDONLY);
     struct stat info;
     if (fstat(file, &info) == -1) {
-        fprintf(stderr, "the file %s is NULL \n", file_path);
+        log_warn("the file %s is NULL ", file_path);
         write(client->fd, RESPONSE_404, strlen(RESPONSE_404));
 
         close(file);
@@ -116,12 +116,12 @@ int handle_static(http_parser *parser, const char *urlStr) {
             ssize_t write_len = write(client->fd, ptr, bytes_left);
 
             if (write_len == -1) {
-                fprintf(stderr, "write failed(errno = %d): %s\n", errno, strerror(errno));
+                log_warn("write failed(errno = %d): %s", errno, strerror(errno));
                 switch (errno) {
                     case EAGAIN:
                     case EINTR:
                     case EINPROGRESS:
-                        fprintf(stderr, "now sleep 0.2s\n");
+                        log_debug("now sleep 0.2s");
                         ev_sleep(0.2);
                         break;
                         // case EPIPE:
@@ -133,12 +133,12 @@ int handle_static(http_parser *parser, const char *urlStr) {
                     }
             } else if (write_len == 0) {
                 need_break = 1;
-                fprintf(stderr, "write_len is zero, and break now\n");
+                log_error("write_len is zero, and break now");
                 break;
             } else if (write_len < bytes_left) {
                 bytes_left -= write_len;
                 ptr += write_len;
-                fprintf(stderr, "write client with something wrong wtih bytes_left = %d & write_len = %d and write the left data !\n", (int)bytes_left, (int)write_len);
+                log_warn("write client with something wrong wtih bytes_left = %d & write_len = %d and write the left data !", (int)bytes_left, (int)write_len);
             } else {
                 break;
             }

@@ -12,7 +12,7 @@ void broadcast_clients(char *except_sessionid, char *message) {
     for (it = list; it; it = it->next) {
         char *sessionid = it->data;
         if (sessionid == NULL) {
-            fprintf(stderr, "the sessioin is NULL ****************\n");
+            log_warn("the sessioin is NULL ****************");
             continue;
         }
 
@@ -29,13 +29,13 @@ void broadcast_clients(char *except_sessionid, char *message) {
 void send_msg(char *sessionid, char *message) {
     session_t *session = store_lookup(sessionid);
     if (session == NULL) {
-        fprintf(stderr, "The sessionid %s has no value !\n", sessionid);
+        log_warn("The sessionid %s has no value !", sessionid);
         return;
     }
 
     GQueue *queue = session->queue;
     if (queue == NULL) {
-        fprintf(stderr, "The queue is NULL !\n");
+        log_warn("The queue is NULL !");
         return;
     }
 
@@ -51,7 +51,7 @@ void send_msg(char *sessionid, char *message) {
         if (trans_fn) {
             trans_fn->output_callback(session);
         } else {
-            fprintf(stderr, "Got NO transport struct !\n");
+            log_warn("Got NO transport struct !");
         }
     }
 }
@@ -59,12 +59,11 @@ void send_msg(char *sessionid, char *message) {
 void notice_connect(message_fields *msg_fields, char *sessionid, char *post_msg) {
     session_t *session = store_lookup(sessionid);
     if (!session) {
-        fprintf(stderr, "The sessionid %s has no value !\n", sessionid);
+        log_warn("The sessionid %s has no value !", sessionid);
         return;
     }
     session->state = CONNECTED_STATE;
     session->endpoint = g_strdup(msg_fields->endpoint);
-    /*printf("session->endpoint = %s\n", session->endpoint);*/
 
     send_msg(sessionid, post_msg);
 }
@@ -72,7 +71,7 @@ void notice_connect(message_fields *msg_fields, char *sessionid, char *post_msg)
 void notice_disconnect(message_fields *msg_fields, char *sessionid) {
     session_t *session = store_lookup(sessionid);
     if (session == NULL) {
-        fprintf(stderr, "The sessionid %s has no value !\n", sessionid);
+        log_warn("The sessionid %s has no value !", sessionid);
         return;
     }
 

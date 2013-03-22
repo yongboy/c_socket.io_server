@@ -94,12 +94,12 @@ static void broadcast_room(gpointer except_sessionid, gpointer msg) {
 static char *endpoint_name;
 static void on_init(const char *endpoint) {
     session_nickname_init();
-    printf("%s has been inited now\n", endpoint);
+    log_debug("%s has been inited now", endpoint);
     endpoint_name = g_strdup(endpoint);
 }
 
 static void on_connect(const char *sessionid) {
-    printf("%s has connect now\n", sessionid);
+    log_debug("%s has connect now", sessionid);
 }
 
 static void on_event(const char *sessionid, const message_fields *msg_fields) {
@@ -112,7 +112,7 @@ static void on_event(const char *sessionid, const message_fields *msg_fields) {
 
     event_message event_msg;
     if (!message_2_struct(msg_fields->message_data, &event_msg)) {
-        fprintf(stderr, "Parse Message Error !\n");
+        log_error("Parse Message Error !");
         return;
     }
     if (!strcmp(event_msg.event_name, "nickname")) {
@@ -153,12 +153,12 @@ static void on_event(const char *sessionid, const message_fields *msg_fields) {
         sprintf(user_msg, "%s::%s:{\"name\":\"user message\",\"args\":[\"%s\",\"%s\"]}", msg_fields->message_type, msg_fields->endpoint, nickname_str, event_msg.event_args);
         broadcast_room(sessionid, user_msg);
     } else {
-        fprintf(stderr, "invalid ori_data is %s\n", msg_fields->ori_data);
+        log_error("invalid ori_data is %s", msg_fields->ori_data);
     }
 }
 
 static void on_disconnect(const char *sessionid, const message_fields *msg_fields) {
-    printf("%s has been disconnect now\n", sessionid);
+    log_debug("%s has been disconnect now\n", sessionid);
 
     char *dis_username = session_nickname_lookup(sessionid);
     if (!dis_username) {
@@ -200,7 +200,7 @@ static void on_disconnect(const char *sessionid, const message_fields *msg_field
 
 static void on_destroy(const char *endpoint) {
     session_nickname_destroy();
-    printf("%s has been destroy now\n", endpoint);
+    log_debug("%s has been destroy now", endpoint);
 }
 
 extern endpoint_implement *init_chat_endpoint_implement(char *chat_endpoint_name) {

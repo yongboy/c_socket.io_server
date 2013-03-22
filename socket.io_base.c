@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <errno.h>
 
 #include <uuid/uuid.h>
 #include "socket_io.h"
@@ -24,7 +25,7 @@ void init_config() {
     flags = G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS;
 
     if (!g_key_file_load_from_file (keyfile, "server.ini", flags, &error)) {
-        fprintf(stderr, "%s\n", "the server.ini not found !");
+        log_fatal("%s\n", "the server.ini not found !");
         return;
     }
 
@@ -41,7 +42,7 @@ char *gen_uuid(char *uuidBuff) {
     uuid_t uuid;
     int result = uuid_generate_time_safe(uuid);
     if (result) {
-        printf("uuid not generated safely\n");
+        log_debug("uuid not generated safely");
     }
 
     uuid_unparse(uuid, uuidBuff);
@@ -51,7 +52,7 @@ char *gen_uuid(char *uuidBuff) {
 
 void handle_disconnected(client_t *client) {
     if (client == NULL) {
-        fprintf(stderr, "the client is NULL !\n");
+        log_warn("the client is NULL !");
         return;
     }
 
@@ -60,25 +61,25 @@ void handle_disconnected(client_t *client) {
         return;
     }
     if (parser && parser->method == HTTP_POST) {
-        printf("parser && parser->method == HTTP_POST is true!\n");
+        log_warn("parser && parser->method == HTTP_POST is true!");
         return;
     }
 
     transport_info *trans_info = &client->trans_info;
     if (trans_info == NULL) {
-        fprintf(stderr, "the trans_info is NULL !\n");
+        log_fatal("the trans_info is NULL !\n");
         return;
     }
 
     char *sessionid = trans_info->sessionid;
     if (sessionid == NULL) {
-        fprintf(stderr, "handle_disconnected's the sessionid is NULL\n");
+        log_warn("handle_disconnected's the sessionid is NULL");
         return;
     }
 
     session_t *session = store_lookup(sessionid);
     if (session == NULL) {
-        fprintf(stderr, "handle_disconnected's the session is NULL\n");
+        log_warn("handle_disconnected's the session is NULL");
         return;
     }
 
@@ -90,7 +91,7 @@ void handle_disconnected(client_t *client) {
         if (endpoint_impl) {
             endpoint_impl->on_disconnect(sessionid, NULL);
         } else {
-            fprintf(stderr, "the endpoint_impl is null !\n");
+            log_warn("the endpoint_impl is null !\n");
         }
     }
 
@@ -99,6 +100,69 @@ void handle_disconnected(client_t *client) {
     if (trans_fn) {
         trans_fn->end_connect(sessionid);
     } else {
-        fprintf(stderr, "Got NO transport struct !\n");
+        log_warn("Got NO transport struct !\n");
+    }
+}
+
+
+
+void free_client(struct ev_loop *loop, client_t *client) {
+    if (client == NULL) {
+        printf("free_res the clientent is NULL !!!!!!\n");
+        return;
+    }
+    ev_io_stop(loop, &client->ev_read);
+
+    ev_timer *timer = &client->timeout;
+    if (timer != NULL && (timer->data != NULL)) {
+        ev_timer_stop(loop, timer);
+    }
+
+    http_parser *parser = &client->parser;
+    if (parser && parser->method == HTTP_GET) {
+        transport_info *trans_info = &client->trans_info;
+        if (trans_info->sessionid) {
+            session_t *session = store_lookup(trans_info->sessionid);
+            if (session != NULL) {
+                session->client = NULL;
+            }
+        }
+    }
+
+    client->data = NULL;
+
+    close(client->fd);
+
+    if (client)
+        free(client);
+}
+
+void free_res(struct ev_loop *loop, ev_io *w) {
+    ev_io_stop(EV_A_ w);
+    client_t *cli = w->data;
+    free_client(loop, cli);
+}
+
+void on_close(client_t *client) {
+    free_client(ev_default_loop(0), client);
+}
+
+void write_output(client_t *client, char *msg, void (*fn)(client_t *client)) {
+    if (client == NULL) {
+        log_error("the client is NULL !");
+        return;
+    }
+
+    if (msg) {
+        ssize_t write_len = write(client->fd, msg, strlen(msg));
+        if (write_len == -1) {
+            log_warn("write failed(errno = %d): %s", errno, strerror(errno));
+        }
+    }else{
+        log_warn("the msg is NULL with file id = %d", client->fd);
+    }
+
+    if (fn) {
+        fn(client);
     }
 }

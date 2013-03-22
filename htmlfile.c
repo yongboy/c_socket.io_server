@@ -16,7 +16,7 @@
 extern config *global_config;
 
 static int format_message(const char *ori_message, char *target_message) {
-    sprintf(target_message, "%X\r\n<script>_('%s');</script>\r\n", ((int)strlen(ori_message) + 23), ori_message);
+    return sprintf(target_message, "%X\r\n<script>_('%s');</script>\r\n", ((int)strlen(ori_message) + 23), ori_message);
 }
 
 static void output_header(client_t *client) {

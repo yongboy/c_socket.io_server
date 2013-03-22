@@ -14,10 +14,6 @@ http_parser_settings settings;
 ev_io ev_accept;
 ev_signal signal_watcher;
 
-static void free_res(struct ev_loop *loop, ev_io *ws);
-void free_client(struct ev_loop *loop, client_t *client); typedef int MyCustomType;
-void on_close(client_t *client);
-
 int setnonblock(int fd) {
     int flags = fcntl(fd, F_GETFL);
     if (flags < 0)
@@ -33,13 +29,13 @@ int setnonblock(int fd) {
 static void read_cb(struct ev_loop *loop, ev_io *w, int revents) {
     client_t *client = w->data;
     if (EV_ERROR & revents) {
-        printf("error event in read\n");
+        log_warn("error event in read");
         free_res(loop, w);
         return ;
     }
 
     if (!(revents & EV_READ)) {
-        fprintf(stdout, "revents & EV_READ is false !\n");
+        log_info("revents & EV_READ is false !\n");
         free_res(loop, w);
         return;
     }
@@ -77,21 +73,21 @@ static void read_cb(struct ev_loop *loop, ev_io *w, int revents) {
                 request_data = malloc(len+1);
                 memcpy(request_data, rbuff, len);
             } else {
-                printf("request_data is not null!\n");
+                log_debug("request_data is not null!");
                 request_data = realloc(request_data, sum + 1);
                 memcpy(request_data + sum - len, rbuff, len);
             }
         } while (len == REQUEST_BUFFER_SIZE);  */
 
     if (len < 0) {
-        printf("read error\n");
+        log_debug("read error");
         handle_disconnected(client);
         free_res(loop, w);
         return;
     }
 
     if (len == 0) {
-        /*printf("client disconnected with read buff len = 0.\n");*/
+        log_debug("client disconnected with read buff len = 0.");
         handle_disconnected(client);
         free_res(loop, w);
         return;
@@ -135,7 +131,7 @@ static void read_cb(struct ev_loop *loop, ev_io *w, int revents) {
                 handle_body_cb(client, rbuff, on_close);
             }
         } else if (parsed < len) {
-            fprintf(stderr, "parse error(len=%d, parsed=%d) and rbuff is \n%s \n", len, (int)parsed, rbuff);
+            log_warn("parse error(len=%d, parsed=%d) and rbuff is \n%s", len, (int)parsed, rbuff);
 
             handle_disconnected(client);
 
@@ -152,14 +148,16 @@ static void accept_cb(struct ev_loop *loop, ev_io *w, int revents) {
     socklen_t client_len = sizeof(client_addr);
     int client_fd = accept(w->fd, (struct sockaddr *) &client_addr, &client_len);
     if (client_fd == -1) {
-        printf("the client_fd is  NULL !\n");
+        log_warn("the client_fd is  NULL !\n");
         return;
     }
 
     client = calloc(1, sizeof(*client));
     client->fd = client_fd;
-    if (setnonblock(client->fd) < 0)
-        err(1, "failed to set client socket to non-blocking");
+    if (setnonblock(client->fd) < 0){
+        log_error("failed to set client socket to non-blocking");
+        return;
+    }
 
     client->ev_read.data = client;
     client->timeout.data = NULL;
@@ -172,6 +170,7 @@ static void accept_cb(struct ev_loop *loop, ev_io *w, int revents) {
 }
 
 void server_init(void) {
+    init_log();
     init_config();
     store_init();
     transports_fn_init();
@@ -183,7 +182,7 @@ void server_init(void) {
 
 void server_register_endpoint(endpoint_implement *endpoint_impl) {
     if (endpoint_impl == NULL) {
-        fprintf(stderr, "the endpoint_impl is NULL !\n");
+        log_warn("the endpoint_impl is NULL !\n");
         return;
     }
 
@@ -200,10 +199,10 @@ static void dump_sig(int signo) {
     size = backtrace (array, 30);
     strings = backtrace_symbols (array, size);
 
-    fprintf (stderr, "Obtained %zd stack frames ...\n", size);
+    log_warn("Obtained %zd stack frames ...", size);
 
     for (i = 0; i <= size; i++)
-        fprintf (stderr, "%s\n", strings[i]);
+        log_warn("%s\n", strings[i]);
 
     free (strings);
 }
@@ -211,7 +210,7 @@ static void dump_sig(int signo) {
 static void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents) {
     int signum = w->signum;
     const gchar *sigstr = g_strsignal(signum);
-    g_printerr("receive sigal(%d) : %s\ndump signal now\n", signum, sigstr);
+    log_error("receive sigal(%d) : %s\ndump signal now", signum, sigstr);
     dump_sig(signum);
     switch (signum) {
     case SIGINT:
@@ -254,69 +253,14 @@ void server_run(int port) {
 
     struct ev_loop *loop = ev_default_loop(0);
 
-    ev_signal_init(&signal_watcher, sigint_cb, SIGPIPE);
+/*    ev_signal_init(&signal_watcher, sigint_cb, SIGPIPE);
     ev_signal_init(&signal_watcher, sigint_cb, SIGINT);
     ev_signal_init(&signal_watcher, sigint_cb, SIGABRT);
     ev_signal_init(&signal_watcher, sigint_cb, SIGSEGV);
-    ev_signal_start(loop, &signal_watcher);
+    ev_signal_start(loop, &signal_watcher);*/
     
     ev_io_init(&ev_accept, accept_cb, listen_fd, EV_READ);
     ev_io_start(loop, &ev_accept);
 
     ev_loop(loop, 0);
-}
-
-void free_client(struct ev_loop *loop, client_t *client) {
-    if (client == NULL) {
-        printf("free_res the clientent is NULL !!!!!!\n");
-        return;
-    }
-    ev_io_stop(loop, &client->ev_read);
-
-    ev_timer *timer = &client->timeout;
-    if (timer != NULL && (timer->data != NULL)) {
-        ev_timer_stop(loop, timer);
-    }
-
-    http_parser *parser = &client->parser;
-    if (parser && parser->method == HTTP_GET) {
-        transport_info *trans_info = &client->trans_info;
-        if (trans_info->sessionid) {
-            session_t *session = store_lookup(trans_info->sessionid);
-            if (session != NULL) {
-                session->client = NULL;
-            }
-        }
-    }
-
-    client->data = NULL;
-
-    close(client->fd);
-
-    if (client)
-        free(client);
-}
-
-static void free_res(struct ev_loop *loop, ev_io *w) {
-    ev_io_stop(EV_A_ w);
-    client_t *cli = w->data;
-    free_client(loop, cli);
-}
-
-void on_close(client_t *client) {
-    free_client(ev_default_loop(0), client);
-}
-
-void write_output(client_t *client, char *msg, void (*fn)(client_t *client)) {
-    if (client == NULL) {
-        printf("the client is NULL !\n");
-        return;
-    }
-
-    if (msg) {
-        write(client->fd, msg, strlen(msg));
-    }
-    if (fn) {
-        fn(client);
-    }
 }

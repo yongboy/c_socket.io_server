@@ -27,6 +27,7 @@ static void output_header(client_t *client) {
 
 static void output_whole(client_t *client, char *body_msg) {
     transport_info *trans_info = &client->trans_info;
+    /*log_debug("body_msg is %s with id = %d and url is %s", body_msg, client->fd, trans_info->oriurl);*/
     char *sessionid = trans_info->sessionid;
     
     char http_msg[strlen(body_msg) + 200];

@@ -23,7 +23,7 @@ static void init_connect(client_t *client, char *sessionid) {
     if (session) {
         ev_timer *timeout = &session->close_timeout;
         if (timeout == NULL) {
-            fprintf(stderr, "init_connect time is NULL!\n");
+            log_warn("init_connect time is NULL!");
             return;
         }
         ev_timer_stop(ev_default_loop(0), timeout);
@@ -34,13 +34,13 @@ static void init_connect(client_t *client, char *sessionid) {
 static void end_connect(char *sessionid) {
     session_t *session = (session_t *)store_lookup(sessionid);
     if (session == NULL) {
-        fprintf(stderr, "the end_connect session is NULL!\n");
+        log_warn("the end_connect session is NULL!");
         return;
     }
 
     ev_timer *timeout = &session->close_timeout;
     if (timeout == NULL) {
-        fprintf(stderr, "end_connect timeout is NULL!\n");
+        log_warn("end_connect timeout is NULL!");
         return;
     }
     timeout->data = g_strdup(sessionid);
@@ -52,19 +52,19 @@ static void end_connect(char *sessionid) {
 
 static void common_output_callback(session_t *session, int keep_long) {
     if (session == NULL) {
-        fprintf(stderr, "the Session is NULL\n");
+        log_warn("the Session is NULL");
         return;
     }
 
     client_t *client = session->client;
     if (client == NULL) {
-        fprintf(stderr, "the client is NULL!\n");
+        log_warn("the client is NULL!");
         return;
     }
 
     GQueue *queue = session->queue;
     if (queue == NULL) {
-        fprintf(stderr, "the queue is null now !\n");
+        log_warn("the queue is null now !");
         return;
     }
 
@@ -72,13 +72,15 @@ static void common_output_callback(session_t *session, int keep_long) {
         char *str;
         while ((str = (char *)g_queue_pop_tail(queue)) != NULL) {
             output_body(client, str);
+            free(str);
         }
     } else {
         char *str = (char *)g_queue_pop_tail(queue);
         if (str == NULL) {
-            fprintf(stderr, "the str is NULL!\n");
+            log_warn("the str is NULL!");
         } else {
             output_body(client, str);
+            free(str);
         }
         ev_timer_stop(ev_default_loop(0), &client->timeout);
 

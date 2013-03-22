@@ -1,11 +1,6 @@
 #ifndef _STORE_H_
 #define _STORE_H_
 #include <glib.h>
-// gboolean wide_open(gpointer key, gpointer value, gpointer user_data);
-
-// void value_destroyed(gpointer data);
-
-// void key_destroyed(gpointer data);
 
 void store_init(void);
 

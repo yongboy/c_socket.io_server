@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <glib.h>
 
 static void *debug_malloc(size_t size, const char *file, int line, const char *func) {
     void *p;

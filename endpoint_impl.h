@@ -5,19 +5,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "log.h"
 // extend the endpoint.h
 #include "endpoint.h"
 
 static void on_init(const char *endpoint);
 static void on_connect(const char *sessionid);
 static void on_message(const char *sessionid, const message_fields *msg_fields) {
-    printf("on_message recevie ori msg is %s\n", msg_fields->ori_data);
+    log_info("on_message recevie ori msg is %s", msg_fields->ori_data);
 }
 static void on_json_message(const char *sessionid, const message_fields *msg_fields) {
-    printf("on_json_message recevie ori msg is %s\n", msg_fields->ori_data);
+    log_info("on_json_message recevie ori msg is %s", msg_fields->ori_data);
 }
 static void on_other(const char *sessionid, const message_fields *msg_fields) {
-    printf("on_other recevie ori msg is %s\n", msg_fields->ori_data);
+    log_info("on_other recevie ori msg is %s", msg_fields->ori_data);
 }
 static void on_event(const char *sessionid, const message_fields *msg_fields);
 static void on_disconnect(const char *sessionid, const message_fields *msg_fields);

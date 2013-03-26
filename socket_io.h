@@ -6,6 +6,8 @@
 #include "include/ev.h"
 #include "include/http-parser/http_parser.h"
 
+#include "log.h"
+
 #define RESPONSE_404 \
     "HTTP/1.1 404 Not Found\r\n"
 

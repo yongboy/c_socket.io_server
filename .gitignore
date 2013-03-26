@@ -15,5 +15,6 @@ c_socket.io_server.sublime-project
 socket.io_server
 core
 mem_watch.log
+*.log
 test/
 # Build and Release Folders

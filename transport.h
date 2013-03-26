@@ -88,7 +88,6 @@ static void common_output_callback(session_t *session, int keep_long) {
     }
 }
 
-
 static transports_fn *init_default_transport() {
     transports_fn *trans_fn = (transports_fn *)malloc(sizeof(transports_fn));
 

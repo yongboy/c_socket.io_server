@@ -6,8 +6,8 @@ The socket.io Linux C server, now just in developing at moment.
 The server base on [libev](http://libev.schmorp.de/) and [glib](https://developer.gnome.org/glib/2.34/), and run in linux systems now.  
 Before run the socket.io server, you have to install some dependencies before:  
 > sudo apt-get install uuid-dev  
-> sudo apt-get install libglib2.0-dev 
-> git clone zlog from https://github.com/HardySimpson/zlog, then make & make install it
+> sudo apt-get install libglib2.0-dev   
+> git clone https://github.com/HardySimpson/zlog *then* make & make install it
 
 The socket.io server may contains some hidden bugs, if you find it, please notice me :))
 
@@ -30,8 +30,8 @@ There are two demos in example folder, [chatroom](example/chatroom.c) and [white
 这是一个纯C语言版本的socket.io服务器端实现，目前仅支持linux系统，严重依赖[libev](http://libev.schmorp.de/) and [glib](https://developer.gnome.org/glib/2.34/)等基础库。  
 在运行socket.io_server之前，需要安装以下依赖：   
 > sudo apt-get install uuid-dev  
-> sudo apt-get install libglib2.0-dev 
-> git clone zlog from https://github.com/HardySimpson/zlog, then make & make install it
+> sudo apt-get install libglib2.0-dev    
+> git clone https://github.com/HardySimpson/zlog *then* make & make install it
 
 ##如何运行
 1. 编写实现代码（eg:chatroom.c），需要包含头文件 **endpoint_impl.h**
